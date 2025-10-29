@@ -5,3 +5,7 @@
 [webots_controller_Youbot base-2]   File "/home/serl/SERLab/Webots/install/webots_hospital_youbot/lib/python3.12/site-packages/webots_hospital_youbot/driver.py", line 194, in step
 [webots_controller_Youbot base-2]     self.rover_info_publisher.publish(self.messaggio_rover_info)
 [webots_controller_Youbot base-2]     ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+self.imu.enable(self.__timestep)
+self.gps.enable(self.__timestep)
