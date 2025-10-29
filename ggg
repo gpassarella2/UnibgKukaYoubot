@@ -1,11 +1,132 @@
-[webots_controller_Youbot base-2] AttributeError: 'YoubotDriver' object has no attribute 'rover_info_publisher'
-[webots_controller_Youbot base-2] Error: wb_inertial_unit_get_roll_pitch_yaw() called for a disabled device! Please use: wb_inertial_unit_enable().
-[webots_controller_Youbot base-2] Error: wb_inertial_unit_get_quaternion() called for a disabled device! Please use: wb_inertial_unit_enable().
+webots_controller_Youbot base-2] AttributeError: 'YoubotDriver' object has no attribute 'imu'
 [webots_controller_Youbot base-2] Traceback (most recent call last):
-[webots_controller_Youbot base-2]   File "/home/serl/SERLab/Webots/install/webots_hospital_youbot/lib/python3.12/site-packages/webots_hospital_youbot/driver.py", line 194, in step
-[webots_controller_Youbot base-2]     self.rover_info_publisher.publish(self.messaggio_rover_info)
-[webots_controller_Youbot base-2]     ^^^^^^^^^^^^^^^^^^^^^^^^^
+[webots_controller_Youbot base-2]   File "/home/serl/SERLab/Webots/install/webots_hospital_youbot/lib/python3.12/site-packages/webots_hospital_youbot/driver.py", line 165, in step
+[webots_controller_Youbot base-2]     vettore_rpy = self.imu.getRollPitchYaw() # roll =[0] pitch = [1] yaw = [2]
+[webots_controller_Youbot base-2]                   ^^^^^^^^
+[webots_controller_Youbot base-2] AttributeError: 'YoubotDriver' object has no attribute 'imu'
+[webots_controller_Youbot base-2] Traceback (most recent call last):
+[webots_controller_Youbot base-2]   File "/home/serl/SERLab/Webots/install/webots_hospital_youbot/lib/python3.12/site-packages/webots_hospital_youbot/driver.py", line 165, in step
+[webots_controller_Youbot base-2]     vettore_rpy = self.imu.getRollPitchYaw() # roll =[0] pitch = [1] yaw = [2]
+[webots_controller_Youbot base-2]                   ^^^^^^^^
+[webots_controller_Youbot base-2] AttributeError: 'YoubotDriver' object has no attribute 'imu'
+^C[WARNING] [launch]: user interrupted with ctrl-c (SIGINT)
+[webots_controller_Youbot base-2] [INFO] [1761732289.379761568] [rclcpp]: signal_handler(signum=2)
+[webots_controller_human_1-3] [INFO] [1761732289.379798218] [rclcpp]: signal_handler(signum=2)
+[webots_controller_Youbot base-2] Traceback (most recent call last):
+[webots_controller_Youbot base-2]   File "/home/serl/SERLab/Webots/install/webots_hospital_youbot/lib/python3.12/site-packages/webots_hospital_youbot/driver.py", line 162, in step
+[webots_controller_Youbot base-2]     rclpy.spin_once(self.__node, timeout_sec=0)
+[webots_controller_Youbot base-2]   File "/opt/ros/jazzy/lib/python3.12/site-packages/rclpy/__init__.py", line 220, in spin_once
+[webots_controller_Youbot base-2]     executor.spin_once(timeout_sec=timeout_sec)
+[webots_controller_Youbot base-2]   File "/opt/ros/jazzy/lib/python3.12/site-packages/rclpy/executors.py", line 827, in spin_once
+[webots_controller_Youbot base-2]     self._spin_once_impl(timeout_sec)
+[webots_controller_Youbot base-2]   File "/opt/ros/jazzy/lib/python3.12/site-packages/rclpy/executors.py", line 811, in _spin_once_impl
+[webots_controller_Youbot base-2]     handler, entity, node = self.wait_for_ready_callbacks(
+[webots_controller_Youbot base-2]                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[webots_controller_Youbot base-2]   File "/opt/ros/jazzy/lib/python3.12/site-packages/rclpy/executors.py", line 781, in wait_for_ready_callbacks
+[webots_controller_Youbot base-2]     return next(self._cb_iter)
+[webots_controller_Youbot base-2]            ^^^^^^^^^^^^^^^^^^^
+[webots_controller_Youbot base-2]   File "/opt/ros/jazzy/lib/python3.12/site-packages/rclpy/executors.py", line 661, in _wait_for_ready_callbacks
+[webots_controller_Youbot base-2]     wait_set = _rclpy.WaitSet(
+[webots_controller_Youbot base-2]                ^^^^^^^^^^^^^^^
+[webots_controller_Youbot base-2] rclpy._rclpy_pybind11.RCLError: failed to initialize wait set: the given context is not valid, either rcl_init() was not called or rcl_shutdown() was called., at ./src/rcl/wait.c:130
+[webots_controller_Youbot base-2] [INFO] [1761732289.457023156] [Youbot_base]: Controller successfully disconnected from robot in Webots simulation.
+[webots_controller_human_1-3] Traceback (most recent call last):
+[webots_controller_human_1-3]   File "/home/serl/SERLab/Webots/install/webots_hospital_youbot/lib/python3.12/site-packages/webots_hospital_youbot/human_driver.py", line 413, in step
+[webots_controller_human_1-3]     rclpy.spin_once(self.__node, timeout_sec=0)
+[webots_controller_human_1-3]   File "/opt/ros/jazzy/lib/python3.12/site-packages/rclpy/__init__.py", line 220, in spin_once
+[webots_controller_human_1-3]     executor.spin_once(timeout_sec=timeout_sec)
+[webots_controller_human_1-3]   File "/opt/ros/jazzy/lib/python3.12/site-packages/rclpy/executors.py", line 827, in spin_once
+[webots_controller_human_1-3]     self._spin_once_impl(timeout_sec)
+[webots_controller_human_1-3]   File "/opt/ros/jazzy/lib/python3.12/site-packages/rclpy/executors.py", line 811, in _spin_once_impl
+[webots_controller_human_1-3]     handler, entity, node = self.wait_for_ready_callbacks(
+[webots_controller_human_1-3]                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[webots_controller_human_1-3]   File "/opt/ros/jazzy/lib/python3.12/site-packages/rclpy/executors.py", line 781, in wait_for_ready_callbacks
+[webots_controller_human_1-3]     return next(self._cb_iter)
+[webots_controller_human_1-3]            ^^^^^^^^^^^^^^^^^^^
+[webots_controller_human_1-3]   File "/opt/ros/jazzy/lib/python3.12/site-packages/rclpy/executors.py", line 661, in _wait_for_ready_callbacks
+[webots_controller_human_1-3]     wait_set = _rclpy.WaitSet(
+[webots_controller_human_1-3]                ^^^^^^^^^^^^^^^
+[webots_controller_human_1-3] rclpy._rclpy_pybind11.RCLError: failed to initialize wait set: the given context is not valid, either rcl_init() was not called or rcl_shutdown() was called., at ./src/rcl/wait.c:130
+[webots_controller_human_1-3] [INFO] [1761732289.512154369] [human_1]: Controller successfully disconnected from robot in Webots simulation.
+[INFO] [webots_controller_Youbot base-2]: process has finished cleanly [pid 63062]
+[INFO] [webots_controller_human_1-3]: process has finished cleanly [pid 63063]
+^C[WARNING] [launch]: user interrupted with ctrl-c (SIGINT) again, ignoring...
+[ERROR] [webots-1]: process has died [pid 63061, exit code -2, cmd '/usr/local/webots/webots --port=1234 /tmp/tmphda0qq1t_world_with_URDF_robot.wbt --batch --mode=realtime'].
+[INFO] [launch]: All log files can be found below /home/serl/.ros/log/2025-10-29-11-04-50-067491-polimnia-63167
+[INFO] [launch]: Default logging verbosity is set to INFO
+WARNING: No valid Webots directory specified in `ROS2_WEBOTS_HOME` and `WEBOTS_HOME`, fallback to default installation folder /usr/local/webots.
+[INFO] [webots-1]: process started with pid [63173]
+[INFO] [webots_controller_Youbot base-2]: process started with pid [63174]
+[INFO] [webots_controller_human_1-3]: process started with pid [63175]
+[webots_controller_Youbot base-2] The specified robot is not in the list of robots with <extern> controllers, retrying for another 50 seconds...
+[webots_controller_human_1-3] The specified robot is not in the list of robots with <extern> controllers, retrying for another 50 seconds...
+[INFO] [webots-1]: process has finished cleanly [pid 63173]
+[INFO] [webots_controller_human_1-3]: sending signal 'SIGINT' to process[webots_controller_human_1-3]
+[INFO] [webots_controller_Youbot base-2]: sending signal 'SIGINT' to process[webots_controller_Youbot base-2]
+[webots_controller_Youbot base-2] Cannot connect to Webots instance, retrying for another 45 seconds...
+[webots_controller_human_1-3] Cannot connect to Webots instance, retrying for another 45 seconds...
+[ERROR] [webots_controller_human_1-3]: process[webots_controller_human_1-3] failed to terminate '5' seconds after receiving 'SIGINT', escalating to 'SIGTERM'
+[ERROR] [webots_controller_Youbot base-2]: process[webots_controller_Youbot base-2] failed to terminate '5' seconds after receiving 'SIGINT', escalating to 'SIGTERM'
+[INFO] [webots_controller_human_1-3]: sending signal 'SIGTERM' to process[webots_controller_human_1-3]
+[INFO] [webots_controller_Youbot base-2]: sending signal 'SIGTERM' to process[webots_controller_Youbot base-2]
+[ERROR] [webots_controller_human_1-3]: process has died [pid 63175, exit code -15, cmd '/opt/ros/jazzy/share/webots_ros2_driver/scripts/webots-controller --robot-name=human_1 --protocol=ipc --port=1234 ros2 --ros-args -p robot_description:=<?xml version="1.0" ?>
+
+<robot name="human_1"> 
+
+    <webots>
 
 
-self.imu.enable(self.__timestep)
-self.gps.enable(self.__timestep)
+    <plugin type="webots_hospital_youbot.human_driver.Pedestrian">
+
+        <parametro> Parametro Human_1</parametro>
+
+    </plugin>
+
+    </webots>
+
+</robot>
+ -p use_sim_time:=True'].
+[ERROR] [webots_controller_Youbot base-2]: process has died [pid 63174, exit code -15, cmd '/opt/ros/jazzy/share/webots_ros2_driver/scripts/webots-controller --robot-name=Youbot base --protocol=ipc --port=1234 ros2 --ros-args -p robot_description:=<?xml version="1.0" ?>
+
+<robot name="Youbot base"> 
+
+    <webots>
+
+
+        <plugin type="webots_hospital_youbot.driver.YoubotDriver">
+
+            <parametro> Parametro YoubotDriver</parametro>
+
+            <!-- <laser>slamtec</laser> -->
+            <!-- <laser>urg</laser> -->
+
+
+            <laser>slamtec</laser>
+
+            <!--    POSIZIONE LASER URG -->
+
+            <laser_urg_x>0.225</laser_urg_x>
+            <laser_urg_y>0.0</laser_urg_y>
+            <laser_urg_z>0.25</laser_urg_z>
+
+            <!--    POSIZIONE IDEALE PER IL LASER SLAMTEC RISPETTO A BASE_LINK -->
+
+            <laser_slamtec_x>0.21</laser_slamtec_x>
+            <laser_slamtec_y>0.0</laser_slamtec_y>
+            <laser_slamtec_z>0.229</laser_slamtec_z>
+
+
+            <translation_x>2.5</translation_x>
+            <translation_y>-2.5</translation_y>
+            <translation_z>0.095</translation_z>
+
+            <rotation_x>0.0</rotation_x>
+            <rotation_y>0.0</rotation_y>
+            <rotation_z>1.0</rotation_z>
+            <rotation_w>0.0</rotation_w> 
+            
+        </plugin>
+    </webots>
+
+</robot>
+ -p use_sim_time:=True -p set_robot_state_publisher:=True'].
