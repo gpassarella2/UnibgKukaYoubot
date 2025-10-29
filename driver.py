@@ -13,13 +13,15 @@ import math
 from util import RoverInformation, ClassObject, LaserObject
 
 ########## Dichiarazione dimensioni KUKA Youbot ##########
-raggioRuote = 0.05
+raggioRuote = 0.0475
 rotationRatio = 1
 slideRatio = 1
 distanzaFrontale = 0.3
 distanzaLaterale = 0.471
 HALF_DISTANCE_BETWEEN_WHEELS = 0.15  # L/2
 R = raggioRuote  
+l = 0.235
+w = 0.158
 
 ########## Inizializzazione Dati iniziali ##########
 TIME_STEP = 32 # milliseconds
@@ -130,7 +132,7 @@ class YoubotDriver:
         self.messaggio_odometria.pose.pose.orientation.w =  conversione_o2r_xq[3] 
    
         self.messaggio_odometria.twist.twist.linear.x = self.forward_speed
-        self.messaggio_odometria.twist.twist.linear.y = 0.0
+        self.messaggio_odometria.twist.twist.linear.y = self.side_speed
         self.messaggio_odometria.twist.twist.angular.z = self.angular_speed
 
         
@@ -142,6 +144,7 @@ class YoubotDriver:
     def __cmd_vel_callback(self,twist): # ad ogni chiamata di questa funzione i valori cambiano
         
         self.forward_speed = twist.linear.x
+        self.side_speed = twist.linear.y
         self.angular_speed = twist.angular.z
 
     # def __camera_callback(self, twist):
@@ -194,14 +197,24 @@ class YoubotDriver:
         self.rover_info_publisher.publish(self.messaggio_rover_info)
 
        
-        '''FROM TWIST TO WHEEL VELOCITIES (KUKA Youbot differenziale)'''
-        self.command_motor_left = (self.forward_speed - self.angular_speed*HALF_DISTANCE_BETWEEN_WHEELS)/raggioRuote
-        self.command_motor_right = (self.forward_speed + self.angular_speed*HALF_DISTANCE_BETWEEN_WHEELS)/raggioRuote
+        '''FROM TWIST TO WHEEL VELOCITIES (KUKA Youbot Mecanum)'''
+        vx = self.forward_speed
+        vy = self.side_speed
+        omega = self.angular_speed
+        M = np.array([
+            [1, -1, -(l + w)],
+            [1,  1,  (l + w)],
+            [1,  1, -(l + w)],
+            [1, -1,  (l + w)]
+        ])
+        wheel_speeds = (1.0 / R) * np.dot(M, np.array([vx, vy, omega]))
                         
         # ************************ BEGIN ODOMETRY ********************************
                 
-        self.__motor_left.setVelocity(self.command_motor_left)
-        self.__motor_right.setVelocity(self.command_motor_right)
+        self.__motors[0].setVelocity(wheel_speeds[0])
+        self.__motors[1].setVelocity(wheel_speeds[1])
+        self.__motors[2].setVelocity(wheel_speeds[2])
+        self.__motors[3].setVelocity(wheel_speeds[3])
 
         '''
         AXIS ANGLE VALUES
@@ -393,6 +406,7 @@ class YoubotDriver:
     def init_components(self):
 
         self.forward_speed = 0.0
+        self.side_speed = 0.0
         self.angular_speed = 0.0
         self.command_motor_left = 0.0
         self.command_motor_right = 0.0
@@ -497,10 +511,15 @@ class YoubotDriver:
     def setup_robot_devices(self, properties):
 
         """Configura i dispositivi del robot (motori, sensori, lidar, ecc.)."""
-        self.__motor_left = self.__robot.getDevice('wheel_left_joint')
-        self.__motor_right = self.__robot.getDevice('wheel_right_joint')
-        self.__sensor_left = self.__robot.getDevice('wheel_left_joint_sensor')
-        self.__sensor_right = self.__robot.getDevice('wheel_right_joint_sensor')
+        self.__motors = [
+            self.__robot.getDevice('wheel1_joint'),
+            self.__robot.getDevice('wheel2_joint'),
+            self.__robot.getDevice('wheel3_joint'),
+            self.__robot.getDevice('wheel4_joint')
+        ]
+
+        self.__sensor_left = None
+        self.__sensor_right = None
         self.__lidar = self.__robot.getDevice(self.laser_name)
 
         self.gps = self.__robot.getDevice('gps')
@@ -508,13 +527,12 @@ class YoubotDriver:
         self.__camera = self.__robot.getDevice('YoubotCamera')
 
 
-        for device in [self.__sensor_left, self.__sensor_right, self.gps, self.imu]:
+        for device in [self.gps, self.imu]:
             device.enable(self.__timestep)
 
-        self.__motor_left.setPosition(float('inf'))
-        self.__motor_right.setPosition(float('inf'))
-        self.__motor_left.setVelocity(0.0)
-        self.__motor_right.setVelocity(0.0)
+        for m in self.__motors:
+            m.setPosition(float('inf'))
+            m.setVelocity(0.0)
 
         self.__lidar.enable(self.__timestep)
         self.__lidar.enablePointCloud()
@@ -1054,4 +1072,3 @@ def build_matrix_from_R(vettore_matrice):
         [0,0,0,1]
         ])
     return matrice
-
