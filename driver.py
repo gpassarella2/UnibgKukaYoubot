@@ -509,35 +509,36 @@ class YoubotDriver:
 
     # SETUP DEVICES IN SIMULAZIONE 
     def setup_robot_devices(self, properties):
+		 """Configura i dispositivi del robot (motori, sensori, lidar, ecc.)."""
+	    self.__motors = [
+	        self.__robot.getDevice('wheel1_joint'),
+	        self.__robot.getDevice('wheel2_joint'),
+	        self.__robot.getDevice('wheel3_joint'),
+	        self.__robot.getDevice('wheel4_joint')
+	    ]
+	
+	    self.__sensor_left = None
+	    self.__sensor_right = None
+	    self.__lidar = self.__robot.getDevice(self.laser_name)
+	
+	    self.gps = self.__robot.getDevice('gps')
+	    self.imu = self.__robot.getDevice('inertial_unit')
+	    if self.imu is None:
+	        self.imu = self.__robot.getDevice('InertialUnit')
+	    self.__camera = self.__robot.getDevice('YoubotCamera')
+	
+	    for device in [self.gps, self.imu]:
+	        device.enable(self.__timestep)
+	
+	    for m in self.__motors:
+	        m.setPosition(float('inf'))
+	        m.setVelocity(0.0)
+	
+	    self.__lidar.enable(self.__timestep)
+	    self.__lidar.enablePointCloud()
+	    self.__camera.enable(self.__timestep)
+	    self.__camera.recognitionEnable(self.__timestep)
 
-        """Configura i dispositivi del robot (motori, sensori, lidar, ecc.)."""
-        self.__motors = [
-            self.__robot.getDevice('wheel1_joint'),
-            self.__robot.getDevice('wheel2_joint'),
-            self.__robot.getDevice('wheel3_joint'),
-            self.__robot.getDevice('wheel4_joint')
-        ]
-
-        self.__sensor_left = None
-        self.__sensor_right = None
-        self.__lidar = self.__robot.getDevice(self.laser_name)
-
-        self.gps = self.__robot.getDevice('gps')
-        self.imu = self.__robot.getDevice('inertial unit')
-        self.__camera = self.__robot.getDevice('YoubotCamera')
-
-
-        for device in [self.gps, self.imu]:
-            device.enable(self.__timestep)
-
-        for m in self.__motors:
-            m.setPosition(float('inf'))
-            m.setVelocity(0.0)
-
-        self.__lidar.enable(self.__timestep)
-        self.__lidar.enablePointCloud()
-        self.__camera.enable(self.__timestep)
-        self.__camera.recognitionEnable(self.__timestep)
 
     #   SETUP PUBLISHER E SUBSCRIBERS 
     def setup_publishers_and_subscribers(self):
