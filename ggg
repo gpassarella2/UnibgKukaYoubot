@@ -1,0 +1,7 @@
+[webots_controller_Youbot base-2] AttributeError: 'YoubotDriver' object has no attribute 'rover_info_publisher'
+[webots_controller_Youbot base-2] Error: wb_inertial_unit_get_roll_pitch_yaw() called for a disabled device! Please use: wb_inertial_unit_enable().
+[webots_controller_Youbot base-2] Error: wb_inertial_unit_get_quaternion() called for a disabled device! Please use: wb_inertial_unit_enable().
+[webots_controller_Youbot base-2] Traceback (most recent call last):
+[webots_controller_Youbot base-2]   File "/home/serl/SERLab/Webots/install/webots_hospital_youbot/lib/python3.12/site-packages/webots_hospital_youbot/driver.py", line 194, in step
+[webots_controller_Youbot base-2]     self.rover_info_publisher.publish(self.messaggio_rover_info)
+[webots_controller_Youbot base-2]     ^^^^^^^^^^^^^^^^^^^^^^^^^
