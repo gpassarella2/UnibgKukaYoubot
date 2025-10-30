@@ -1,0 +1,12 @@
+#cosi si trova dove è installato webots
+  which webots
+  whereis webots
+
+
+#per impostare il valore
+  export WEBOTS_HOME=percorso
+
+
+#per vedere se è corretto
+  echo $WEBOTS_HOME
+  ls $WEBOTS_HOME/resources
