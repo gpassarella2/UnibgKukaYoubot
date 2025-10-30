@@ -12,3 +12,11 @@ sabled device! Please use: wb_inertial_unit_enable().
 [webots_controller_Youbot base-2]     self.__motor_left.setVelocity(self.command_motor_left)
 [webots_controller_Youbot base-2]     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 [webots_controller_Youbot base-2] AttributeError: 'NoneType' object has no attribute 'setVelocity'
+
+
+    self.__motors = [
+        self.__robot.getDevice('wheel1_joint'),
+        self.__robot.getDevice('wheel2_joint'),
+        self.__robot.getDevice('wheel3_joint'),
+        self.__robot.getDevice('wheel4_joint')
+    ]
