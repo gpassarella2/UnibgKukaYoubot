@@ -111,6 +111,8 @@ PointLight {
   intensity 4
   location 8 -1 1.5
 }
+
+#definizione del robot youbot kuka
 Youbot {
   translation -9.62 11.5 0.095
   rotation 0 0 -1 0
@@ -1047,7 +1049,7 @@ Youbot {
   controller "<extern>"
   supervisor TRUE
 }
-
+#definizione del robot tiago
 Robot {
   translation -10.5 11.5 0.095
   rotation 0 0 -1 0

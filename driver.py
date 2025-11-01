@@ -16,12 +16,11 @@ from util import RoverInformation, ClassObject, LaserObject
 raggioRuote = 0.0475
 rotationRatio = 1
 slideRatio = 1
-distanzaFrontale = 0.3
-distanzaLaterale = 0.471
 HALF_DISTANCE_BETWEEN_WHEELS = 0.15  # L/2
-R = raggioRuote  
-l = 0.235
-w = 0.158
+
+#distanze dal centro del robot
+AsseAP = 0.235   #Distanza dal centro del robot all’asse anteriore/posteriore
+AsseSxDx = 0.158   #Distanza dal centro del robot al lato sinistro/destro
 
 ########## Inizializzazione Dati iniziali ##########
 TIME_STEP = 32 # milliseconds
@@ -198,19 +197,21 @@ class YoubotDriver:
 
        
         '''FROM TWIST TO WHEEL VELOCITIES (KUKA Youbot Mecanum)'''
-        vx = self.forward_speed
-        vy = self.side_speed
-        omega = self.angular_speed
+        vx = self.forward_speed      #avanti e indietro
+        vy = self.side_speed         #destra e sinistra
+        omega = self.angular_speed  #angolare
+        #AsseSxDx distanza asse sinistro destro dal centro
+        #AsseAP distanza asse Anteriore Posteriore dal centro
         M = np.array([
-            [1, -1, -(l + w)],
-            [1,  1,  (l + w)],
-            [1,  1, -(l + w)],
-            [1, -1,  (l + w)]
+            [1, -1, -(AsseAP + AsseSxDx)],
+            [1,  1,  (AsseAP + AsseSxDx)],
+            [1,  1, -(AsseAP + AsseSxDx)],
+            [1, -1,  (AsseAP + AsseSxDx)]
         ])
-        wheel_speeds = (1.0 / R) * np.dot(M, np.array([vx, vy, omega]))
+        wheel_speeds = (1.0 / raggioRuote) * np.dot(M, np.array([vx, vy, omega]))
                         
         # ************************ BEGIN ODOMETRY ********************************
-                
+        #invio dei comandi ai motori
         self.__motors[0].setVelocity(wheel_speeds[0])
         self.__motors[1].setVelocity(wheel_speeds[1])
         self.__motors[2].setVelocity(wheel_speeds[2])
@@ -220,7 +221,7 @@ class YoubotDriver:
         AXIS ANGLE VALUES
         CALCOLO QUATERNIONI DAI VALORI AXIS ANGLES DI WEBOTS 
         '''
-        
+        #leggo orientamento dalla simulazione
         self.coordinate_assolute[0].getSFRotation()[0] #x
         self.coordinate_assolute[0].getSFRotation()[1] #y 
         self.coordinate_assolute[0].getSFRotation()[2] #z 
