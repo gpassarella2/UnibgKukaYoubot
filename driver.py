@@ -50,7 +50,8 @@ class YoubotDriver:
         self.__timestep = TIME_STEP
         self.__node = rclpy.create_node('Youbot_base_driver')
         self.__node.get_logger().info('Inizio di Youbot_base_driver')
-
+        # INIZIALIZZAZIONE DEI PUBLISHER E DEI SUBSCRIBER 
+        self.setup_publishers_and_subscribers()
         self.init_components()
         self.coordinate_assolute = []
         self.objects_vector = []
@@ -64,9 +65,6 @@ class YoubotDriver:
         
         # INIZIALIZZAZIONE DEI DEVICE IN SIMULAZIONE
         self.setup_robot_devices(properties)
-
-        # INIZIALIZZAZIONE DEI PUBLISHER E DEI SUBSCRIBER 
-        self.setup_publishers_and_subscribers()
 
         # INIZIALIZZAZION DEI MESSAGGI
         self.init_messages()
@@ -99,7 +97,7 @@ class YoubotDriver:
         self.take_data_from_Webots_node(properties,webots_node)
         
         self.init_tf_camera()
-    
+        self.__node.get_logger().info("inizializzato correttamente")
     def update_odom_tf(self, conversione_o2r_xq,current_time):
 
         self.odom_trasfrom.header.stamp = current_time
@@ -165,7 +163,7 @@ class YoubotDriver:
 
         # PRENDO DALLA BASE INERZIALE RPY
         vettore_rpy = self.imu.getRollPitchYaw() # roll =[0] pitch = [1] yaw = [2]
-        '''x y,z, w'''
+      
         # PRENDO DALLA BASE INERZIALE I QUATERNIONI
         vettore_quaternion = self.imu.getQuaternion()
 
@@ -193,8 +191,9 @@ class YoubotDriver:
             self.inizio = False
 
         '''PUBLISH ROVER DRIVER INFO '''
-        self.rover_info_publisher.publish(self.messaggio_rover_info)
-
+        
+        #self.rover_info_publisher.publish(self.messaggio_rover_info)
+        
        
         '''FROM TWIST TO WHEEL VELOCITIES (KUKA Youbot Mecanum)'''
         vx = self.forward_speed      #avanti e indietro
@@ -212,10 +211,10 @@ class YoubotDriver:
                         
         # ************************ BEGIN ODOMETRY ********************************
         #invio dei comandi ai motori
-        self.__motors[0].setVelocity(wheel_speeds[0])
-        self.__motors[1].setVelocity(wheel_speeds[1])
-        self.__motors[2].setVelocity(wheel_speeds[2])
-        self.__motors[3].setVelocity(wheel_speeds[3])
+        self.__motor_front_left.setVelocity(wheel_speeds[0])
+        self.__motor_front_right.setVelocity(wheel_speeds[1])
+        self.__motor_back_left.setVelocity(wheel_speeds[2])
+        self.__motor_back_right.setVelocity(wheel_speeds[3])
 
         '''
         AXIS ANGLE VALUES
@@ -409,8 +408,7 @@ class YoubotDriver:
         self.forward_speed = 0.0
         self.side_speed = 0.0
         self.angular_speed = 0.0
-        self.command_motor_left = 0.0
-        self.command_motor_right = 0.0
+        self.wheel_speeds = [0.0, 0.0, 0.0, 0.0]
         self.count_time_stamp_scan = 0.0
         self.count_time_stamp_odometry = 0.0
         self.count_time_stamp_marker = 0.0
@@ -508,38 +506,44 @@ class YoubotDriver:
             self.__node.get_logger().info('Tipo di laser non specificato.')
             return 
 
+     
     # SETUP DEVICES IN SIMULAZIONE 
     def setup_robot_devices(self, properties):
-		 """Configura i dispositivi del robot (motori, sensori, lidar, ecc.)."""
-	    self.__motors = [
-	        self.__robot.getDevice('wheel1_joint'),
-	        self.__robot.getDevice('wheel2_joint'),
-	        self.__robot.getDevice('wheel3_joint'),
-	        self.__robot.getDevice('wheel4_joint')
-	    ]
-	
-	    self.__sensor_left = None
-	    self.__sensor_right = None
-	    self.__lidar = self.__robot.getDevice(self.laser_name)
-	
-	    self.gps = self.__robot.getDevice('gps')
-	    self.imu = self.__robot.getDevice('inertial_unit')
-	    if self.imu is None:
-	        self.imu = self.__robot.getDevice('InertialUnit')
-	    self.__camera = self.__robot.getDevice('YoubotCamera')
-	
-	    for device in [self.gps, self.imu]:
-	        device.enable(self.__timestep)
-	
-	    for m in self.__motors:
-	        m.setPosition(float('inf'))
-	        m.setVelocity(0.0)
-	
-	    self.__lidar.enable(self.__timestep)
-	    self.__lidar.enablePointCloud()
-	    self.__camera.enable(self.__timestep)
-	    self.__camera.recognitionEnable(self.__timestep)
 
+        self.__motor_front_left = self.__robot.getDevice('wheel1')
+        self.__motor_front_right = self.__robot.getDevice('wheel2')
+        self.__motor_back_left = self.__robot.getDevice('wheel3')
+        self.__motor_back_right = self.__robot.getDevice('wheel4')
+
+        self.__sensor_left = None
+        self.__sensor_right = None
+        self.__lidar = self.__robot.getDevice(self.laser_name)
+
+        self.gps = self.__robot.getDevice('gps')
+        self.imu = self.__robot.getDevice('inertial_unit')
+        
+        if self.imu is None:
+            self.imu = self.__robot.getDevice('InertialUnit')
+        
+        self.__camera = self.__robot.getDevice('YoubotCamera')
+        
+        for device in [self.gps, self.imu]:
+            device.enable(self.__timestep)
+        
+        self.__motor_front_left.setPosition(float('inf'))
+        self.__motor_front_right.setPosition(float('inf'))
+        self.__motor_back_left.setPosition(float('inf'))
+        self.__motor_back_right.setPosition(float('inf'))
+        
+        self.__motor_front_left.setVelocity(0.0)
+        self.__motor_front_right.setVelocity(0.0)
+        self.__motor_back_left.setVelocity(0.0)
+        self.__motor_back_right.setVelocity(0.0)
+        
+        self.__lidar.enable(self.__timestep)
+        self.__lidar.enablePointCloud()
+        self.__camera.enable(self.__timestep)
+        self.__camera.recognitionEnable(self.__timestep)
 
     #   SETUP PUBLISHER E SUBSCRIBERS 
     def setup_publishers_and_subscribers(self):
@@ -637,7 +641,8 @@ class YoubotDriver:
 
     #   PRENDO LE INFORMAZIONI DAI NODI WEBOTS IN SIMULAZIONE 
     def take_data_from_Webots_node(self,properties,webots_node):
-
+        self.__node.get_logger().info("Ricerca del nodo YOUBOT nel mondo Webots...")#stampa aggiunte per vedere se trova il robot
+        
         ############################## TAKE INFO THANKS SUPERVISOR PERMISSIONS  #########################
         self.root_children_field = webots_node.robot.getRoot().getField('children')
         self.n =  self.root_children_field.getCount()
