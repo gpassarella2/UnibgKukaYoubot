@@ -1,12 +1,8 @@
-#cosi si trova dove è installato webots
-  which webots
-  whereis webots
+[INFO] [webots-1]: process started with pid [45766]
+[INFO] [webots_controller_Youbot base-2]: process started with pid [45767]
+[INFO] [webots_controller_human_1-3]: process started with pid [45768]
+[webots_controller_Youbot base-2] The specified robot is not in the list of robots with <extern> controllers, retrying for another 50 seconds...
+[webots_controller_human_1-3] The specified robot is not in the list of robots with <extern> controllers, retrying for another 50 seconds...
 
 
-#per impostare il valore
-  export WEBOTS_HOME=percorso
 
-
-#per vedere se è corretto
-  echo $WEBOTS_HOME
-  ls $WEBOTS_HOME/resources
