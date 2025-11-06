@@ -1,37 +1,5 @@
-[webots_controller_Youbot base-2]     self.rover_info_publisher.publish(self.messaggio_rover_info)
-[webots_controller_Youbot base-2]     ^^^^^^^^^^^^^^^^^^^^^^^^^
-[webots_controller_Youbot base-2] AttributeError: 'YoubotDriver' object has no attribute 'rover_info_publisher'
-[webots_controller_Youbot base-2] Traceback (most recent call last):
-[webots_controller_Youbot base-2]   File "/home/serl/SERLab/Webots/install/webots_hospital_youbot/lib/python3.12/site-packages/webots_hospital_youbot/driver.py", line 198, in step
-[webots_controller_Youbot base-2]     self.rover_info_publisher.publish(self.messaggio_rover_info)
-[webots_controller_Youbot base-2]     ^^^^^^^^^^^^^^^^^^^^^^^^^
-[webots_controller_Youbot base-2] AttributeError: 'YoubotDriver' object has no attribute 'rover_info_publisher'
-[webots_controller_Youbot base-2] Traceback (most recent call last):
-[webots_controller_Youbot base-2]   File "/home/serl/SERLab/Webots/install/webots_hospital_youbot/lib/python3.12/site-packages/webots_hospital_youbot/driver.py", line 198, in step
-[webots_controller_Youbot base-2]     self.rover_info_publisher.publish(self.messaggio_rover_info)
-[webots_controller_Youbot base-2]     ^^^^^^^^^^^^^^^^^^^^^^^^^
-[webots_controller_Youbot base-2] AttributeError: 'YoubotDriver' object has no attribute 'rover_info_publisher'
-[webots_controller_Youbot base-2] Traceback (most recent call last):
-[webots_controller_Youbot base-2]   File "/home/serl/SERLab/Webots/install/webots_hospital_youbot/lib/python3.12/site-packages/webots_hospital_youbot/driver.py", line 198, in step
-[webots_controller_Youbot base-2]     self.rover_info_publisher.publish(self.messaggio_rover_info)
-[webots_controller_Youbot base-2]     ^^^^^^^^^^^^^^^^^^^^^^^^^
-[webots_controller_Youbot base-2] AttributeError: 'YoubotDriver' object has no attribute 'rover_info_publisher'
-[webots_controller_Youbot base-2] Traceback (most recent call last):
-[webots_controller_Youbot base-2]   File "/home/serl/SERLab/Webots/install/webots_hospital_youbot/lib/python3.12/site-packages/webots_hospital_youbot/driver.py", line 198, in step
-[webots_controller_Youbot base-2]     self.rover_info_publisher.publish(self.messaggio_rover_info)
-[webots_controller_Youbot base-2]     ^^^^^^^^^^^^^^^^^^^^^^^^^
-[webots_controller_Youbot base-2] AttributeError: 'YoubotDriver' object has no attribute 'rover_info_publisher'
-[webots_controller_Youbot base-2] Traceback (most recent call last):
-[webots_controller_Youbot base-2]   File "/home/serl/SERLab/Webots/install/webots_hospital_youbot/lib/python3.12/site-packages/webots_hospital_youbot/driver.py", line 198, in step
-[webots_controller_Youbot base-2]     self.rover_info_publisher.publish(self.messaggio_rover_info)
-[webots_controller_Youbot base-2]     ^^^^^^^^^^^^^^^^^^^^^^^^^
-[webots_controller_Youbot base-2] AttributeError: 'YoubotDriver' object has no attribute 'rover_info_publisher'
-[webots_controller_Youbot base-2] Traceback (most recent call last):
-[webots_controller_Youbot base-2]   File "/home/serl/SERLab/Webots/install/webots_hospital_youbot/lib/python3.12/site-packages/webots_hospital_youbot/driver.py", line 198, in step
-[webots_controller_Youbot base-2]     self.rover_info_publisher.publish(self.messaggio_rover_info)
-[webots_controller_Youbot base-2]     ^^^^^^^^^^^^^^^^^^^^^^^^^
-[webots_controller_Youbot base-2] AttributeError: 'YoubotDriver' object has no attribute 'rover_info_publisher'
-[webots_controller_Youbot base-2] Traceback (most recent call last):
-[webots_controller_Youbot base-2]   File "/home/serl/SERLab/Webots/install/webots_hospital_youbot/lib/python3.12/site-packages/webots_hospital_youbot/driver.py", line 198, in step
-[webots_controller_Youbot base-2]     self.rover_info_publisher.publish(self.messaggio_rover_info)
-[webots_controller_Youbot base-2]     ^^^^^^^^^^^^^^^^^^^^^^^^^
+self.rover_info_publisher = self.__node.create_publisher(
+    RoverInfo,        # tipo del messaggio ROS2
+    '/rover_info',    # nome del topic
+    10                # queue size
+)
