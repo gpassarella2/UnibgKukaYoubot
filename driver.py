@@ -95,6 +95,13 @@ class YoubotDriver:
 
         # TAKE DATA AND SAVE DATA FROM WEBOTS NODES
         self.take_data_from_Webots_node(properties,webots_node)
+        if len(self.coordinate_assolute) < 2:
+            self.__node.get_logger().error(
+                "ERRORE: coordinate_assolute non inizializzato correttamente. "
+                "Verifica il nome del robot nel file .wbt ('Youbot base')."
+            )
+        return
+                
         
         self.init_tf_camera()
         self.__node.get_logger().info("inizializzato correttamente")
@@ -652,7 +659,7 @@ class YoubotDriver:
                     
                     nodo_livello_1 = self.root_children_field.getMFNode(k)
                     # self.__node.get_logger().info(str(nodo_livello_1.getTypeName())+ '  ' + str(k))
-                    if(nodo_livello_1.getTypeName() == 'Robot'):    # Cerco il nodo Door in base al nome
+                    if(nodo_livello_1.getTypeName() == 'Youbot'):    # Cerco il nodo Door in base al nome
                         
                         self.__node.get_logger().info('trovato Robot alla posizione  '+ str(k))
                         robot_name = nodo_livello_1.getField('name')
@@ -667,37 +674,38 @@ class YoubotDriver:
                             self.__node.get_logger().info('trovato rotation Youbot base: ' + str(rotation_oggetto.getSFRotation()))
                             
                             self.__node.get_logger().info('trovato translation Youbot base: ' + str(translation_oggetto .getSFVec3f()))
-
-                            children_1 = nodo_livello_1.getField('children')  
+                            self.__node.get_logger().info('cerco il lidar: name=laser_slamtec')
+                            
+                            children_1 = nodo_livello_1.getField('bodySlot')#è stato sostituito bodyslot rispetto a children  
 
                             # SCELTA DEI LASER DA UTILIZZARE 
 
-                            #   URG
-                            nodo_laser_1 = children_1.getMFNode(0) 
-                            laser_1_position = nodo_laser_1.getField('translation') 
-                            self.__node.get_logger().info('Laser Position: ' + str(laser_1_position.getSFVec3f()[0]) + ', ' + str(laser_1_position.getSFVec3f()[1]) + ', ' + str(laser_1_position.getSFVec3f()[2]))
+                            #   URG (non è stato inserito nel world e quindi da errore se non è commentato)
+                            #nodo_laser_1 = children_1.getMFNode(0) 
+                            #laser_1_position = nodo_laser_1.getField('translation') 
+                            #self.__node.get_logger().info('Laser Position: ' + str(laser_1_position.getSFVec3f()[0]) + ', ' + str(laser_1_position.getSFVec3f()[1]) + ', ' + str(laser_1_position.getSFVec3f()[2]))
                             
                             #   SLAMTEC
                             nodo_laser_2 = children_1.getMFNode(1)
                             laser_2_position = nodo_laser_2.getField('translation') 
                             self.__node.get_logger().info('Laser Position: ' + str(laser_2_position.getSFVec3f()[0]) + ', ' + str(laser_2_position.getSFVec3f()[1]) + ', ' + str(laser_2_position.getSFVec3f()[2]))
-
-
-                            if(self.laser_name == 'laser_urg'):
+                            self.__node.get_logger().info('laser_slamtec trovato')
+#se volessi aggiungere un laser_urg allora dovrei decommentare tutto il codice sottostante e sostituire all'if dello slamtec un elif e decommentare posizione_laser_1 anche in esso
+                            #if(self.laser_name == 'laser_urg'):
                                 
-                                posizione_laser_1 = [self.laser_x, self.laser_y, self.laser_z]
-                                laser_1_position.setSFVec3f(posizione_laser_1)
+                            #    posizione_laser_1 = [self.laser_x, self.laser_y, self.laser_z]
+                            #    laser_1_position.setSFVec3f(posizione_laser_1)
 
                                 # posizione_laser_2 = [0.0, 0.0, laser_2_position.getSFVec3f()[2]]
-                                posizione_laser_2 = [0.0, 0.0, 0.0]
-                                laser_2_position.setSFVec3f(posizione_laser_2)
+                            #    posizione_laser_2 = [0.0, 0.0, 0.0]
+                            #    laser_2_position.setSFVec3f(posizione_laser_2)
 
-                            elif(self.laser_name == 'laser_slamtec'):
+                            if(self.laser_name == 'laser_slamtec'):
 
                                 # posizione_laser_1 = [0.0, 0.0, laser_1_position.getSFVec3f()[2]]
-                                posizione_laser_1 = [0.0, 0.0, 0.0]
+                                # posizione_laser_1 = [0.0, 0.0, 0.0]
 
-                                laser_1_position.setSFVec3f(posizione_laser_1)
+                                #laser_1_position.setSFVec3f(posizione_laser_1)
 
                                 posizione_laser_2 = [self.laser_x, self.laser_y, self.laser_z]
                                 laser_2_position.setSFVec3f(posizione_laser_2)
@@ -705,17 +713,12 @@ class YoubotDriver:
                             #   FINE SCELTA DEI LASER 
                         
                             #   INIZIO MODIFICA 
-
-                            nodo_livello_2 = children_1.getMFNode(2)
-                            children_2 = nodo_livello_2.getField('children')
-                            nodo_livello_3 = children_2.getMFNode(0)      
-                            children_3 = nodo_livello_3.getField('children') 
-                            nodo_livello_4 = children_3.getMFNode(0)            
-                            children_4 = nodo_livello_4.getField('children')     
-                            nodo_livello_5 = children_4.getMFNode(0)                                                                              # LIVELLO 8       VISUAL_LINK
+                            self.__node.get_logger().info('cerco visual link: name=visual_link')
+                            nodo_visual_link = children_1.getMFNode(2)
+                            #VISUAL_LINK
                             self.__node.get_logger().info('visual_link')
-                            visual_link_rot = nodo_livello_5.getField('rotation')       #   Da inserire in un vettore 
-                            visual_link_tra = nodo_livello_5.getField('translation')    #   Da inserire in un vettore 
+                            visual_link_rot = nodo_visual_link.getField('rotation')       #   Da inserire in un vettore 
+                            visual_link_tra = nodo_visual_link.getField('translation')    #   Da inserire in un vettore 
                             self.__node.get_logger().info('rotation_visual_link: ' + str(visual_link_rot.getSFRotation()))
                             self.__node.get_logger().info('translation_visual_link: ' + str(visual_link_tra.getSFVec3f()))                         
 
@@ -729,24 +732,34 @@ class YoubotDriver:
 
                             self.__node.get_logger().info('R_visual_link: \n' + str(self.R_visual_link))
                             self.__node.get_logger().info('M_visual_link: \n' + str(self.M_visual_link))
+                            
+                            self.__node.get_logger().info('accedo ai figli del visual link')
+                            children_5 = nodo_visual_link.getField('children')
 
-                            children_5 = nodo_livello_5.getField('children')                                                                      # LIVELLO 9       CHILDREN                                                    
-                            nodo_livello_6 = children_5.getMFNode(0)                                                                              # LIVELLO 10      PAN_LINK        
+                            self.__node.get_logger().info('accesso eseguito')
+                            # LIVELLO 9       CHILDREN                    
+                            self.__node.get_logger().info('accedo al pan link')
+                            #non mi trova questo nodo
+                            nodo_pan = children_5.getMFNode(0)
+                            #LIVELLO 10 PAN_LINK    
+                            
                             self.__node.get_logger().info('Sono dentro pan_link')
-                            pan_link_rot = nodo_livello_6.getField('rotation') 
-                            pan_link_tra = nodo_livello_6.getField('translation')  
+                            
+                            pan_link_tra = nodo_pan_link.getField('translation') 
+                            pan_link_rot = nodo_pan_link.getField('rotation') 
+                             
                             self.__node.get_logger().info('rotation_pan_link: ' + str(pan_link_rot.getSFRotation()))
                             self.__node.get_logger().info('translation_pan_link: ' + str(pan_link_tra.getSFVec3f()))
 
                             self.pan_link.append(pan_link_rot)
                             self.pan_link.append(pan_link_tra)
 
-                            children_6 = nodo_livello_6.getField('children')                                                                      # LIVELLO 11      CHILDREN
-                            nodo_livello_7 = children_6.getMFNode(0)                                                                              # LIVELLO 12      PANT_TILT_LINK
+                            children_6 = nodo_pan_link.getField('children')                                                                      # LIVELLO 11      CHILDREN
+                            nodo_pan_link_tilt = children_6.getMFNode(0)                                                                              # LIVELLO 12      PANT_TILT_LINK
 
                             self.__node.get_logger().info('Sono dentro pan_tilt_link')
-                            pan_tilt_link_rot = nodo_livello_7.getField('rotation') #   Da inserire in un vettore 
-                            pan_tilt_link_tra = nodo_livello_7.getField('translation')   #   Da inserire in un vettore 
+                            pan_tilt_link_rot = nodo_pan_link_tilt.getField('rotation') #   Da inserire in un vettore 
+                            pan_tilt_link_tra = nodo_pan_link_tilt.getField('translation')   #   Da inserire in un vettore 
                             self.__node.get_logger().info('rotation_pan_tilt_link: ' + str(pan_tilt_link_rot.getSFRotation()))
                             self.__node.get_logger().info('translation_pan_tilt_link: ' + str(pan_tilt_link_tra.getSFVec3f()))
 
@@ -762,12 +775,12 @@ class YoubotDriver:
                             self.__node.get_logger().info('R_pan_tilt_link: \n' + str(self.R_pan_tilt_link))
                             self.__node.get_logger().info('M_pan_tilt_link: \n' + str(self.M_pan_tilt_link))
 
-                            children_7 = nodo_livello_7.getField('children')                                                                      # LIVELLO 13      CHILDREN
-                            nodo_livello_8 = children_7.getMFNode(0)    
+                            children_7 = nodo_pan_link_tilt.getField('children')                                                                      # LIVELLO 13      CHILDREN
+                            nodo_tilt_link = children_7.getMFNode(0)    
 
                             self.__node.get_logger().info('Sono dentro tilt_link')
-                            tilt_link_rot = nodo_livello_8.getField('rotation') 
-                            tilt_link_tra = nodo_livello_8.getField('translation')  
+                            tilt_link_rot = nodo_tilt_link.getField('rotation') 
+                            tilt_link_tra = nodo_tilt_link.getField('translation')  
 
                             self.__node.get_logger().info('rotation_tilt_link: ' + str(tilt_link_rot.getSFRotation()))
                             self.__node.get_logger().info('translation_tilt_link: ' + str(tilt_link_tra.getSFVec3f()))
@@ -780,7 +793,7 @@ class YoubotDriver:
                             self.M_tilt_odom = build_matrix_from_R(self.R_pan_tilt_link)
                             self.quaternion_tilt_odom = transformations.pq_from_transform(self.M_pan_tilt_link)
 
-                            children_8 = nodo_livello_8.getField('children') # CERCO IL FIELD CHILDENTRO IN ROBOT                                 # LIVELLO 15      CHILDREN
+                            children_8 = nodo_tilt_link.getField('children') # CERCO IL FIELD CHILDENTRO IN ROBOT                                 # LIVELLO 15      CHILDREN
                             nodo_livello_9 = children_8.getMFNode(0)   
 
                             self.__node.get_logger().info('Sono dentro camera_link')
