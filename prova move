@@ -1,66 +1,88 @@
-#!/usr/bin/env python3
 import rclpy
 from rclpy.node import Node
+from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Twist
-from nav_msgs.msg import Odometry
-from rclpy.qos import QoSProfile
-import math
-#QUESTO è IL CODICE PER TESTARE SE SI MUOVE E SE IL DRIVER è FATTO IN MANIERA GIUSTA
 
-class YoubotDriverTest(Node):
+class YoubotFullFrontAvoidance(Node):
     def __init__(self):
-        super().__init__('YoubotDriverTest')
+        super().__init__('youbot_full_avoidance')
 
-        qos = QoSProfile(depth=10)
-        self.pub_twist = self.create_publisher(Twist, 'rover_twist', qos)
-        self.sub_odom = self.create_subscription(Odometry, 'odom', self.odom_callback, qos)
+        self.subscription = self.create_subscription(
+            LaserScan, 'scan_webots', self.scan_callback, 10)
+        self.publisher_ = self.create_publisher(Twist, 'rover_twist', 10)
+        
+        self.get_logger().info('Logica FULL FRONT (180 gradi) Avviata')
 
-        self.cmd = Twist()
-        self.counter = 0
+    def scan_callback(self, msg):
+        ranges = msg.ranges
+        
+        if not ranges:
+            return
 
-    def odom_callback(self, msg):
-        x = msg.pose.pose.position.x
-        y = msg.pose.pose.position.y
-        theta = msg.pose.pose.orientation.z * 180.0 / math.pi
-        print(f"Odometry({x:.2f}, {y:.2f}, {theta:.1f})")
-#ho fatto un counter abbastanza casuale per simulare dei movimenti per vedere se gli arrivano i comandi 
-    def move_pattern(self):
-        if 0 <= self.counter < 25:
-            self.cmd.linear.x = 0.2   # avanti
-            self.cmd.linear.y = 0.0
-            self.cmd.angular.z = 0.0
-        elif 25 <= self.counter < 50:
-            self.cmd.linear.x = 0.0
-            self.cmd.linear.y = 0.2   # destra
-            self.cmd.angular.z = 0.0
-        elif 50 <= self.counter < 75:
-            self.cmd.linear.x = 0.0
-            self.cmd.linear.y = -0.2  # sinistra
-            self.cmd.angular.z = 0.0
-        elif 75 <= self.counter < 100:
-            self.cmd.linear.x = 0.0
-            self.cmd.linear.y = 0.0
-            self.cmd.angular.z = 0.5  # rotazione oraria
+        # --- MAPPA INDICI SU 1800 RAGGI ---
+        # Centro = 900
+        # 90 gradi = 450 raggi (perché 1800/4 = 450)
+        
+        ind_destra_inizio = 450  # Esattamente a destra (90°)
+        ind_centro = 900         # Esattamente avanti (0°)
+        ind_sinistra_fine = 1350 # Esattamente a sinistra (90°)
+
+        # --- 1. ESTRAZIONE SETTORI (Tutti i 900 raggi frontali) ---
+        
+        # Settore Destra-Frontale (da 90° destra fino al centro)
+        settore_destra = ranges[ind_destra_inizio : ind_centro]
+        
+        # Settore Sinistra-Frontale (dal centro fino a 90° sinistra)
+        settore_sinistra = ranges[ind_centro : ind_sinistra_fine]
+
+        # --- 2. FUNZIONE PULIZIA ---
+        def get_min_clean(settore):
+            # Filtra valori nulli, inf o troppo vicini (errori)
+            validi = [r for r in settore if r > 0.05 and r != float('inf')]
+            if not validi:
+                return 10.0 # Libero
+            return min(validi)
+
+        min_destra = get_min_clean(settore_destra)
+        min_sinistra = get_min_clean(settore_sinistra)
+
+        # Il minimo globale davanti a noi
+        ostacolo_frontale = min(min_destra, min_sinistra)
+
+        # --- 3. LOGICA ---
+        cmd = Twist()
+        DISTANZA_STOP = 0.65 # Metri
+
+        if ostacolo_frontale < DISTANZA_STOP:
+            # OSTACOLO RILEVATO NEI 180 GRADI FRONTALI
+            cmd.linear.x = 0.0
+            
+            # Dove ho più spazio?
+            if min_sinistra > min_destra:
+                # Più spazio a sinistra -> Giro a Sinistra (Z positivo)
+                # (Nota: nel codice precedente avevo invertito la logica di sterzata per errore)
+                self.get_logger().info(f'Muro a Destra ({min_destra:.2f}m) -> Giro SX')
+                cmd.angular.z = 0.5
+            else:
+                # Più spazio a destra -> Giro a Destra (Z negativo)
+                self.get_logger().info(f'Muro a Sinistra ({min_sinistra:.2f}m) -> Giro DX')
+                cmd.angular.z = -0.5
         else:
-            self.cmd = Twist()        # stop
+            # AVANTI
+            cmd.linear.x = 0.4
+            cmd.angular.z = 0.0
 
-        self.pub_twist.publish(self.cmd)
-        self.counter += 1
-
+        self.publisher_.publish(cmd)
 
 def main(args=None):
     rclpy.init(args=args)
-    node = YoubotDriverTest()
-    rate = node.create_rate(5)  # 5 Hz
-
-    while rclpy.ok() and node.counter < 120:
-        rclpy.spin_once(node, timeout_sec=0)
-        node.move_pattern()
-        rate.sleep()
-
+    node = YoubotFullFrontAvoidance()
+    try:
+        rclpy.spin(node)
+    except KeyboardInterrupt:
+        pass
     node.destroy_node()
     rclpy.shutdown()
-
 
 if __name__ == '__main__':
     main()
