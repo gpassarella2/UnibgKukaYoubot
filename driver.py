@@ -11,6 +11,8 @@ from pyquaternion import Quaternion  # for quaternion operations
 from pytransform3d import transformations,rotations
 import math
 from util import RoverInformation, ClassObject, LaserObject
+from controller import Supervisor
+import sys
 
 ########## Dichiarazione dimensioni KUKA Youbot ##########
 raggioRuote = 0.0475
@@ -19,8 +21,8 @@ slideRatio = 1
 HALF_DISTANCE_BETWEEN_WHEELS = 0.15  # L/2
 
 #distanze dal centro del robot
-AsseAP = 0.235   #Distanza dal centro del robot all’asse anteriore/posteriore
-AsseSxDx = 0.158   #Distanza dal centro del robot al lato sinistro/destro
+AsseAP = 0.235    #Distanza dal centro del robot all’asse anteriore/posteriore
+AsseSxDx = 0.158    #Distanza dal centro del robot al lato sinistro/destro
 
 ########## Inizializzazione Dati iniziali ##########
 TIME_STEP = 32 # milliseconds
@@ -82,7 +84,7 @@ class YoubotDriver:
         self.__node.get_logger().info('  Youbot Base is supervisor? ' + str(self.__robot.getSupervisor()))
         
         ''' TAKE DATA THANKS SUPERVISOR PERMISSIONS'''
-        self.posizione_robot = self.__robot.getSelf().getPosition() # Vector 1x3        
+        self.posizione_robot = self.__robot.getSelf().getPosition() # Vector 1x3         
         self.orientazione_robot = self.__robot.getSelf().getOrientation() # Vector 3x3    
         self.rototraslazione_robot = self.__robot.getSelf().getPose() # Matrix roto-traslantion 
 
@@ -100,7 +102,7 @@ class YoubotDriver:
                 "ERRORE: coordinate_assolute non inizializzato correttamente. "
                 "Verifica il nome del robot nel file .wbt ('Youbot base')."
             )
-        return
+            return
                 
         
         self.init_tf_camera()
@@ -122,26 +124,26 @@ class YoubotDriver:
 
     def build_odom(self, conversione_o2r_xq,current_time):
         # PUBLIC ODOMETRY MESSAGE 
-                       
+                                
         #self.messaggio_odometria.header.stamp = current_time
         self.messaggio_odometria.header.stamp =  self.__node.get_clock().now().to_msg()
         self.messaggio_odometria.header.frame_id = "odom"
         self.messaggio_odometria.child_frame_id = "base_link"
-        self.messaggio_odometria.pose.pose.position.x =   conversione_o2r_xq[0]
+        self.messaggio_odometria.pose.pose.position.x =    conversione_o2r_xq[0]
         self.messaggio_odometria.pose.pose.position.y = conversione_o2r_xq[1] 
         self.messaggio_odometria.pose.pose.position.z = conversione_o2r_xq[2]     
-        self.messaggio_odometria.pose.pose.orientation.x =   conversione_o2r_xq[4]
+        self.messaggio_odometria.pose.pose.orientation.x =    conversione_o2r_xq[4]
         self.messaggio_odometria.pose.pose.orientation.y = conversione_o2r_xq[5] 
         self.messaggio_odometria.pose.pose.orientation.z =  conversione_o2r_xq[6] 
         self.messaggio_odometria.pose.pose.orientation.w =  conversione_o2r_xq[3] 
-   
+    
         self.messaggio_odometria.twist.twist.linear.x = self.forward_speed
         self.messaggio_odometria.twist.twist.linear.y = self.side_speed
         self.messaggio_odometria.twist.twist.angular.z = self.angular_speed
 
         
-#        print("Odometry time stamp sec  = ",  self.messaggio_odometria.header.stamp.sec)
-#        print("Odometry time stamp nsec = ",  self.messaggio_odometria.header.stamp.nanosec)
+#         print("Odometry time stamp sec  = ",  self.messaggio_odometria.header.stamp.sec)
+#         print("Odometry time stamp nsec = ",  self.messaggio_odometria.header.stamp.nanosec)
 
 
     # TWIST CALLBACK 
@@ -154,23 +156,23 @@ class YoubotDriver:
     # def __camera_callback(self, twist):
         
     #     self.pan_speed = twist.linear.x
-    #     self.tilt_speed =   twist.angular.z
+    #     self.tilt_speed =    twist.angular.z
     def __camera_callback(self, jointstate):
-	    # joint_msg.velocity()[1] = tilt_speed;
-        self.pan_speed =    jointstate.velocity[0]
+        # joint_msg.velocity()[1] = tilt_speed;
+        self.pan_speed =     jointstate.velocity[0]
 
         self.tilt_speed =    jointstate.velocity[1]
 
     # ********************************* BEGIN SIMULATION CYCLE ******************************+
     def step(self): 
-    
+        
         global matrice_postsetup, matrice_post_setup_inversa
 
         rclpy.spin_once(self.__node, timeout_sec=0)
 
         # PRENDO DALLA BASE INERZIALE RPY
         vettore_rpy = self.imu.getRollPitchYaw() # roll =[0] pitch = [1] yaw = [2]
-      
+        
         # PRENDO DALLA BASE INERZIALE I QUATERNIONI
         vettore_quaternion = self.imu.getQuaternion()
 
@@ -201,10 +203,10 @@ class YoubotDriver:
         
         #self.rover_info_publisher.publish(self.messaggio_rover_info)
         
-       
+        
         '''FROM TWIST TO WHEEL VELOCITIES (KUKA Youbot Mecanum)'''
         vx = self.forward_speed      #avanti e indietro
-        vy = self.side_speed         #destra e sinistra
+        vy = self.side_speed        #destra e sinistra
         omega = self.angular_speed  #angolare
         #AsseSxDx distanza asse sinistro destro dal centro
         #AsseAP distanza asse Anteriore Posteriore dal centro
@@ -215,7 +217,7 @@ class YoubotDriver:
             [1, -1,  (AsseAP + AsseSxDx)]
         ])
         wheel_speeds = (1.0 / raggioRuote) * np.dot(M, np.array([vx, vy, omega]))
-                        
+                            
         # ************************ BEGIN ODOMETRY ********************************
         #invio dei comandi ai motori
         self.__motor_front_left.setVelocity(wheel_speeds[0])
@@ -233,7 +235,7 @@ class YoubotDriver:
         self.coordinate_assolute[0].getSFRotation()[2] #z 
         self.coordinate_assolute[0].getSFRotation()[3] #w 
 
-        # Definizione di un Quaternione con la libreria pyquaternion   w, x, y, z 
+        # Definizione di un Quaternione con la libreria pyquaternion    w, x, y, z 
         
         '''UPDATE vettore_quaternion_wxyz from IMU SENSOR '''
         # vettore_quaternion_wxyz = np.array([vettore_quaternion[3], vettore_quaternion[0] , vettore_quaternion[1] , vettore_quaternion[2]]) 
@@ -271,13 +273,13 @@ class YoubotDriver:
             if( self.laser_object.model == 'SLAMTEC'): 
                 for i in range(len(self.messaggio_webots_scanner.ranges)):
                         
-                        angolo =  (360.0/self.__lidar.getHorizontalResolution())*i
-                        # if(angolo >= 90.0 and angolo<=270.0):
-                        if(angolo >= 165.0 and angolo<=195.0):
-                            self.messaggio_webots_scanner.ranges[i] = 0.0
+                    angolo =  (360.0/self.__lidar.getHorizontalResolution())*i
+                    # if(angolo >= 90.0 and angolo<=270.0):
+                    if(angolo >= 165.0 and angolo<=195.0):
+                        self.messaggio_webots_scanner.ranges[i] = 0.0
 
 
-                        
+                    
             self.laser_publisher.publish(self.messaggio_webots_scanner)
             self.count_time_stamp_scan = 0.0
 
@@ -288,7 +290,7 @@ class YoubotDriver:
             self.objects_publisher.publish(self.messaggio_objects) 
  
         
-        #self.__node.get_logger().info( 'pubblica:  ' + str(pubblica) )
+        #self.__node.get_logger().info( 'pubblica:   ' + str(pubblica) )
 
         # CALCOLO SPOSTAMENTO CAMERA:
 
@@ -296,22 +298,22 @@ class YoubotDriver:
         delta_pan = self.pan_speed*(self.__timestep/1000)
         delta_tilt = self.tilt_speed*(self.__timestep/1000)
 
-        new_pan = self.pan_link[0].getSFRotation()[3] + delta_pan      
-        new_tilt = self.tilt_link[0].getSFRotation()[3] + delta_tilt    
+        new_pan = self.pan_link[0].getSFRotation()[3] + delta_pan     
+        new_tilt = self.tilt_link[0].getSFRotation()[3] + delta_tilt   
 
         axis_angle_pan = [self.pan_link[0].getSFRotation()[0], self.pan_link[0].getSFRotation()[1], self.pan_link[0].getSFRotation()[2], new_pan]
 
         R_pan_link = rotations.matrix_from_axis_angle(axis_angle_pan)   #   VARIABILI 
-        M_pan_link = build_matrix_from_R(R_pan_link)                    #   VARIABILI
+        M_pan_link = build_matrix_from_R(R_pan_link)                     #   VARIABILI
         M_pan_relativo = transformations.concat(self.M_visual_link,M_pan_link)  # ROTO-TRASLAZIONE DA VISUAL_LINK A  PAN_LINK
         quaternion_pan = transformations.pq_from_transform(M_pan_relativo) 
 
-        axis_angle_tilt = [self.tilt_link[0].getSFRotation()[0], self.tilt_link[0].getSFRotation()[1], self.tilt_link[0].getSFRotation()[2], new_tilt]   # ROTAZIONE SU ASSE Z 
+        axis_angle_tilt = [self.tilt_link[0].getSFRotation()[0], self.tilt_link[0].getSFRotation()[1], self.tilt_link[0].getSFRotation()[2], new_tilt]    # ROTAZIONE SU ASSE Z 
 
         # self.__node.get_logger().info('new axis_angle_tilt: ' + str(axis_angle_tilt))
 
-        R_tilt_link = rotations.matrix_from_axis_angle(axis_angle_tilt)         # VARIABILI
-        M_tilt_link = build_matrix_from_R(R_tilt_link)                            # VARIABILI 
+        R_tilt_link = rotations.matrix_from_axis_angle(axis_angle_tilt)       # VARIABILI
+        M_tilt_link = build_matrix_from_R(R_tilt_link)                          # VARIABILI 
         # M_tilt_relativo = transformations.concat(self.M_pan_tilt_link,M_tilt_link) # ROTO-TRASLAZIONE DA PANT_TILT_LINK A  PAN_TILT 
         M_tilt_relativo = transformations.concat(M_tilt_link,self.M_tilt_odom) # ROTO-TRASLAZIONE DA PANT_TILT_LINK A  PAN_TILT 
 
@@ -346,13 +348,13 @@ class YoubotDriver:
 
         self.static_broadcaster.sendTransform(self.TF_pan_2_tilt) 
 
-    '''   FUNZIONI DENTRO STEP()    '''
+    '''    FUNZIONI DENTRO STEP()    '''
 
     def detect_markers(self,roto_now):
         
         self.messaggio_objects = Object3DArray()
         num_objects = self.__camera.getRecognitionNumberOfObjects()
-       
+        
         if(num_objects > 0):
 
             # self.__node.get_logger().info('number of objects: ' + str(num_objects) )
@@ -369,7 +371,7 @@ class YoubotDriver:
                 
 
                 for i in range(len(self.objects_vector)):
-                                    
+                        
                     if(str(oggetto_model) == self.objects_vector[i].model):
 
                         # Calcolo la roto-traslazione tra marcatore e posizione attuale del robot 
@@ -428,7 +430,7 @@ class YoubotDriver:
         self.quaternion_visual = []
 
         self.R_pan_odom  = []
-        self.M_pan_odom = []   
+        self.M_pan_odom = []    
 
         self.visual_link = []
         self.pan_link = []
@@ -452,7 +454,7 @@ class YoubotDriver:
         self.M_tiago_finale_M = [] 
         self.quaternion_camera = []
 
-        self.camera_link_odom= []    
+        self.camera_link_odom= []   
         self.camera_link= []    
         self.tiago_M = []
 
@@ -469,7 +471,7 @@ class YoubotDriver:
         self.odom_trasfrom.header.frame_id = 'odom'
         self.odom_trasfrom.child_frame_id = 'base_link'
 
-        #   PER LA TELEMERA      
+        #     PER LA TELEMERA        
 
     # SCELTA DEL LASER DA UTILIZZARE DA FILE DI CONFIGURAZIONE 
     def init_laser(self, properties):
@@ -513,7 +515,7 @@ class YoubotDriver:
             self.__node.get_logger().info('Tipo di laser non specificato.')
             return 
 
-     
+        
     # SETUP DEVICES IN SIMULAZIONE 
     def setup_robot_devices(self, properties):
 
@@ -648,7 +650,7 @@ class YoubotDriver:
 
     #   PRENDO LE INFORMAZIONI DAI NODI WEBOTS IN SIMULAZIONE 
     def take_data_from_Webots_node(self,properties,webots_node):
-        self.__node.get_logger().info("Ricerca del nodo YOUBOT nel mondo Webots...")#stampa aggiunte per vedere se trova il robot
+        self.__node.get_logger().info("Ricerca del nodo YOUBOT nel mondo Webots...")
         
         ############################## TAKE INFO THANKS SUPERVISOR PERMISSIONS  #########################
         self.root_children_field = webots_node.robot.getRoot().getField('children')
@@ -656,269 +658,255 @@ class YoubotDriver:
         
         '''ITERATION OF WEBOTS NODES'''
         for k in range(self.n):
+            
+            nodo_livello_1 = self.root_children_field.getMFNode(k)
+            # self.__node.get_logger().info(str(nodo_livello_1.getTypeName())+ '  ' + str(k))
+            
+            if(nodo_livello_1.getTypeName() == 'Youbot'):    # Cerco il nodo Youbot
+                
+                robot_name = nodo_livello_1.getField('name')
+                
+                if(robot_name.getSFString() == 'Youbot base'):
+                    self.__node.get_logger().info('è stato trovato il nodo Youbot base')
+                    rotation_oggetto = nodo_livello_1.getField('rotation')
+                    translation_oggetto = nodo_livello_1.getField('translation')
+
+                    self.coordinate_assolute.append(rotation_oggetto)
+                    self.coordinate_assolute.append(translation_oggetto)
+                    self.__node.get_logger().info('trovato rotation Youbot base: ' + str(rotation_oggetto.getSFRotation()))
                     
-                    nodo_livello_1 = self.root_children_field.getMFNode(k)
-                    # self.__node.get_logger().info(str(nodo_livello_1.getTypeName())+ '  ' + str(k))
-                    if(nodo_livello_1.getTypeName() == 'Youbot'):    # Cerco il nodo Door in base al nome
-                        
-                        self.__node.get_logger().info('trovato Robot alla posizione  '+ str(k))
-                        robot_name = nodo_livello_1.getField('name')
-                        
-                        if(robot_name.getSFString() == 'Youbot base'):
-                            self.__node.get_logger().info('è stato trovato il nodo Youbot base')
-                            rotation_oggetto = nodo_livello_1.getField('rotation')
-                            translation_oggetto = nodo_livello_1.getField('translation')
+                    self.__node.get_logger().info('trovato translation Youbot base: ' + str(translation_oggetto .getSFVec3f()))
+                    self.__node.get_logger().info('cerco il lidar: name=laser_slamtec')
+                    
+                    children_1 = nodo_livello_1.getField('bodySlot') #è stato sostituito bodyslot rispetto a children  
 
-                            self.coordinate_assolute.append(rotation_oggetto)
-                            self.coordinate_assolute.append(translation_oggetto)
-                            self.__node.get_logger().info('trovato rotation Youbot base: ' + str(rotation_oggetto.getSFRotation()))
-                            
-                            self.__node.get_logger().info('trovato translation Youbot base: ' + str(translation_oggetto .getSFVec3f()))
-                            self.__node.get_logger().info('cerco il lidar: name=laser_slamtec')
-                            
-                            children_1 = nodo_livello_1.getField('bodySlot')#è stato sostituito bodyslot rispetto a children  
+                    # SCELTA DEI LASER DA UTILIZZARE 
 
-                            # SCELTA DEI LASER DA UTILIZZARE 
+                    #   URG (non è stato inserito nel world e quindi da errore se non è commentato)
+                    #nodo_laser_1 = children_1.getMFNode(0) 
+                    #laser_1_position = nodo_laser_1.getField('translation') 
+                    #self.__node.get_logger().info('Laser Position: ' + str(laser_1_position.getSFVec3f()[0]) + ', ' + str(laser_1_position.getSFVec3f()[1]) + ', ' + str(laser_1_position.getSFVec3f()[2]))
+                    
+                    #   SLAMTEC
+                    # NOTA: Lidar 'laser_slamtec' è in bodySlot[0] nel .wbt
+                    nodo_laser_2 = children_1.getMFNode(0) 
+                    laser_2_position = nodo_laser_2.getField('translation') 
+                    self.__node.get_logger().info('Laser Position: ' + str(laser_2_position.getSFVec3f()[0]) + ', ' + str(laser_2_position.getSFVec3f()[1]) + ', ' + str(laser_2_position.getSFVec3f()[2]))
+                    self.__node.get_logger().info('laser_slamtec trovato')
+                    
+                    #if(self.laser_name == 'laser_urg'):
+                    #    
+                    #    posizione_laser_1 = [self.laser_x, self.laser_y, self.laser_z]
+                    #    laser_1_position.setSFVec3f(posizione_laser_1)
 
-                            #   URG (non è stato inserito nel world e quindi da errore se non è commentato)
-                            #nodo_laser_1 = children_1.getMFNode(0) 
-                            #laser_1_position = nodo_laser_1.getField('translation') 
-                            #self.__node.get_logger().info('Laser Position: ' + str(laser_1_position.getSFVec3f()[0]) + ', ' + str(laser_1_position.getSFVec3f()[1]) + ', ' + str(laser_1_position.getSFVec3f()[2]))
-                            
-                            #   SLAMTEC
-                            nodo_laser_2 = children_1.getMFNode(1)
-                            laser_2_position = nodo_laser_2.getField('translation') 
-                            self.__node.get_logger().info('Laser Position: ' + str(laser_2_position.getSFVec3f()[0]) + ', ' + str(laser_2_position.getSFVec3f()[1]) + ', ' + str(laser_2_position.getSFVec3f()[2]))
-                            self.__node.get_logger().info('laser_slamtec trovato')
-#se volessi aggiungere un laser_urg allora dovrei decommentare tutto il codice sottostante e sostituire all'if dello slamtec un elif e decommentare posizione_laser_1 anche in esso
-                            #if(self.laser_name == 'laser_urg'):
-                                
-                            #    posizione_laser_1 = [self.laser_x, self.laser_y, self.laser_z]
-                            #    laser_1_position.setSFVec3f(posizione_laser_1)
+                    #    posizione_laser_2 = [0.0, 0.0, laser_2_position.getSFVec3f()[2]]
+                    #    posizione_laser_2 = [0.0, 0.0, 0.0]
+                    #    laser_2_position.setSFVec3f(posizione_laser_2)
 
-                                # posizione_laser_2 = [0.0, 0.0, laser_2_position.getSFVec3f()[2]]
-                            #    posizione_laser_2 = [0.0, 0.0, 0.0]
-                            #    laser_2_position.setSFVec3f(posizione_laser_2)
+                    if(self.laser_name == 'laser_slamtec'):
 
-                            if(self.laser_name == 'laser_slamtec'):
+                        # posizione_laser_1 = [0.0, 0.0, laser_1_position.getSFVec3f()[2]]
+                        #posizione_laser_1 = [0.0, 0.0, 0.0]
 
-                                # posizione_laser_1 = [0.0, 0.0, laser_1_position.getSFVec3f()[2]]
-                                # posizione_laser_1 = [0.0, 0.0, 0.0]
+                        #laser_1_position.setSFVec3f(posizione_laser_1)
 
-                                #laser_1_position.setSFVec3f(posizione_laser_1)
+                        posizione_laser_2 = [self.laser_x, self.laser_y, self.laser_z]
+                        laser_2_position.setSFVec3f(posizione_laser_2)
 
-                                posizione_laser_2 = [self.laser_x, self.laser_y, self.laser_z]
-                                laser_2_position.setSFVec3f(posizione_laser_2)
+                    #   FINE SCELTA DEI LASER 
+                    
+                    # --- INIZIO MODIFICA CORRETTA PER LA TELECAMERA ---
+                    self.__node.get_logger().info("Inizio ricerca link telecamera (struttura .wbt)...")
 
-                            #   FINE SCELTA DEI LASER 
-                        
-                            #   INIZIO MODIFICA 
-                            self.__node.get_logger().info('cerco visual link: name=visual_link')
-                            nodo_visual_link = children_1.getMFNode(2)
-                            #VISUAL_LINK
-                            self.__node.get_logger().info('visual_link')
-                            visual_link_rot = nodo_visual_link.getField('rotation')       #   Da inserire in un vettore 
-                            visual_link_tra = nodo_visual_link.getField('translation')    #   Da inserire in un vettore 
-                            self.__node.get_logger().info('rotation_visual_link: ' + str(visual_link_rot.getSFRotation()))
-                            self.__node.get_logger().info('translation_visual_link: ' + str(visual_link_tra.getSFVec3f()))                         
+                    # 1. Trova 'visual_link' (bodySlot[1])
+                    nodo_visual_link = children_1.getMFNode(1) # È in bodySlot[1], non [2]
+                    if nodo_visual_link is None or nodo_visual_link.getField('name').getSFString() != 'visual_link':
+                        self.__node.get_logger().fatal("ERRORE: Impossibile trovare 'visual_link' in bodySlot[1]")
+                        raise RuntimeError("Struttura .wbt non corrispondente (visual_link)")
 
-                            self.visual_link.append(visual_link_rot)    # APPEND ROTATION VISUAL LINK 
-                            self.visual_link.append(visual_link_tra)    # APPEND TRANSLATION VISUAL_LINK             
-                            # MATRICI DI ROTAZIONE VISUAL_LINK 
+                    self.__node.get_logger().info('Trovato visual_link')
+                    visual_link_rot = nodo_visual_link.getField('rotation')
+                    visual_link_tra = nodo_visual_link.getField('translation')
+                    
+                    self.visual_link.append(visual_link_rot)
+                    self.visual_link.append(visual_link_tra)
+                    self.R_visual_link = rotations.matrix_from_axis_angle(visual_link_rot.getSFRotation())
+                    self.M_visual_link = build_matrix_from_R(self.R_visual_link)
+                    self.quaternion_visual = transformations.pq_from_transform(self.M_visual_link)
+                    self.__node.get_logger().info('R_visual_link: \n' + str(self.R_visual_link))
 
-                            self.R_visual_link = rotations.matrix_from_axis_angle(visual_link_rot.getSFRotation())
-                            self.M_visual_link = build_matrix_from_R(self.R_visual_link)
-                            self.quaternion_visual = transformations.pq_from_transform(self.M_visual_link) # Quaternione VISUAL_LINK
+                    # 2. Scendi a 'pan_link' (statico)
+                    children_visual = nodo_visual_link.getField('children')
+                    nodo_pan_link = children_visual.getMFNode(0) # Solid { name "pan_link" }
+                    if nodo_pan_link is None or nodo_pan_link.getField('name').getSFString() != 'pan_link':
+                        self.__node.get_logger().fatal("ERRORE: Impossibile trovare 'pan_link' in visual_link.children[0]")
+                        raise RuntimeError("Struttura .wbt non corrispondente (pan_link)")
+                    
+                    # 3. Scendi a 'pan_tilt_link' (rotante per PAN)
+                    children_pan = nodo_pan_link.getField('children')
+                    nodo_pan_tilt_link = children_pan.getMFNode(0) # Solid { name "pan_tilt_link" }
+                    if nodo_pan_tilt_link is None or nodo_pan_tilt_link.getField('name').getSFString() != 'pan_tilt_link':
+                        self.__node.get_logger().fatal("ERRORE: Impossibile trovare 'pan_tilt_link' in pan_link.children[0]")
+                        raise RuntimeError("Struttura .wbt non corrispondente (pan_tilt_link)")
 
-                            self.__node.get_logger().info('R_visual_link: \n' + str(self.R_visual_link))
-                            self.__node.get_logger().info('M_visual_link: \n' + str(self.M_visual_link))
-                            
-                            self.__node.get_logger().info('accedo ai figli del visual link')
-                            children_5 = nodo_visual_link.getField('children')
+                    self.__node.get_logger().info('Trovato pan_tilt_link (usato per pan_link)')
+                    pan_link_rot = nodo_pan_tilt_link.getField('rotation') # QUESTA è la rotazione per il PAN
+                    pan_link_tra = nodo_pan_tilt_link.getField('translation') # Questo campo non esiste nel .wbt, ma il codice lo cerca
+                    
+                    # Popola self.pan_link per la funzione step()
+                    self.pan_link.append(pan_link_rot)
+                    self.pan_link.append(pan_link_tra)
+                    
+                    # Salva i dati di pan_tilt_link (come faceva il codice originale)
+                    self.pan_tilt_link.append(pan_link_rot)
+                    self.pan_tilt_link.append(pan_link_tra)
+                    self.R_pan_tilt_link = rotations.matrix_from_axis_angle(pan_link_rot.getSFRotation())
+                    self.M_pan_tilt_link = build_matrix_from_R(self.R_pan_tilt_link)
+                    self.quaternion_pan_tilt = transformations.pq_from_transform(self.M_pan_tilt_link)
+                    self.__node.get_logger().info('R_pan_tilt_link: \n' + str(self.R_pan_tilt_link))
 
-                            self.__node.get_logger().info('accesso eseguito')
-                            # LIVELLO 9       CHILDREN                    
-                            self.__node.get_logger().info('accedo al pan link')
-                            #non mi trova questo nodo
-                            nodo_pan = children_5.getMFNode(0)
-                            #LIVELLO 10 PAN_LINK    
-                            
-                            self.__node.get_logger().info('Sono dentro pan_link')
-                            
-                            pan_link_tra = nodo_pan_link.getField('translation') 
-                            pan_link_rot = nodo_pan_link.getField('rotation') 
-                             
-                            self.__node.get_logger().info('rotation_pan_link: ' + str(pan_link_rot.getSFRotation()))
-                            self.__node.get_logger().info('translation_pan_link: ' + str(pan_link_tra.getSFVec3f()))
+                    # 4. Scendi a 'tilt_link' (rotante per TILT)
+                    children_pan_tilt = nodo_pan_tilt_link.getField('children')
+                    nodo_tilt_link = children_pan_tilt.getMFNode(0) # Solid { name "tilt_link" }
+                    if nodo_tilt_link is None or nodo_tilt_link.getField('name').getSFString() != 'tilt_link':
+                        self.__node.get_logger().fatal("ERRORE: Impossibile trovare 'tilt_link' in pan_tilt_link.children[0]")
+                        raise RuntimeError("Struttura .wbt non corrispondente (tilt_link)")
 
-                            self.pan_link.append(pan_link_rot)
-                            self.pan_link.append(pan_link_tra)
+                    self.__node.get_logger().info('Trovato tilt_link')
+                    tilt_link_rot = nodo_tilt_link.getField('rotation') # QUESTA è la rotazione per il TILT
+                    tilt_link_tra = nodo_tilt_link.getField('translation') # Questo campo non esiste nel .wbt
+                    
+                    # Popola self.tilt_link per la funzione step()
+                    self.tilt_link.append(tilt_link_rot)
+                    self.tilt_link.append(tilt_link_tra)
 
-                            children_6 = nodo_pan_link.getField('children')                                                                      # LIVELLO 11      CHILDREN
-                            nodo_pan_link_tilt = children_6.getMFNode(0)                                                                              # LIVELLO 12      PANT_TILT_LINK
+                    # Il tuo codice originale (riga 750) usava pan_tilt_link_rot.getSFRotation() qui. 
+                    # È più probabile che tu voglia la rotazione di tilt_link_rot.
+                    self.R_tilt_odom = rotations.matrix_from_axis_angle(tilt_link_rot.getSFRotation()) 
+                    self.M_tilt_odom = build_matrix_from_R(self.R_tilt_odom) 
+                    self.quaternion_tilt_odom = transformations.pq_from_transform(self.M_tilt_odom)
 
-                            self.__node.get_logger().info('Sono dentro pan_tilt_link')
-                            pan_tilt_link_rot = nodo_pan_link_tilt.getField('rotation') #   Da inserire in un vettore 
-                            pan_tilt_link_tra = nodo_pan_link_tilt.getField('translation')   #   Da inserire in un vettore 
-                            self.__node.get_logger().info('rotation_pan_tilt_link: ' + str(pan_tilt_link_rot.getSFRotation()))
-                            self.__node.get_logger().info('translation_pan_tilt_link: ' + str(pan_tilt_link_tra.getSFVec3f()))
+                    # 5. Scendi a 'camera_link' (figlio di tilt_link)
+                    children_tilt = nodo_tilt_link.getField('children')
+                    nodo_camera_link = children_tilt.getMFNode(0) # Solid { name "camera_link" }
+                    if nodo_camera_link is None or nodo_camera_link.getField('name').getSFString() != 'camera_link':
+                        self.__node.get_logger().fatal("ERRORE: Impossibile trovare 'camera_link' in tilt_link.children[0]")
+                        raise RuntimeError("Struttura .wbt non corrispondente (camera_link)")
+                    
+                    self.__node.get_logger().info('Sono dentro camera_link')
+                    camera_link_rot = nodo_camera_link.getField('rotation')
+                    camera_link_tra = nodo_camera_link.getField('translation')
+                    self.camera_link.append(camera_link_rot)
+                    self.camera_link.append(camera_link_tra)
+                    
+                    self.R_tilt_2_tiltcamera_link = rotations.matrix_from_axis_angle(camera_link_rot.getSFRotation())
+                    self.M_tilt_2_tiltcamera_link = build_matrix_from_R(self.R_tilt_2_tiltcamera_link)
 
-                            self.pan_tilt_link.append(pan_tilt_link_rot)
-                            self.pan_tilt_link.append(pan_tilt_link_tra)
+                    # 6. Scendi a 'YoubotCamera' (figlio di camera_link)
+                    children_camera_link = nodo_camera_link.getField('children')
+                    nodo_youbot_camera = children_camera_link.getMFNode(0) # Camera { name "YoubotCamera" }
+                    if nodo_youbot_camera is None or nodo_youbot_camera.getField('name').getSFString() != 'YoubotCamera':
+                        self.__node.get_logger().fatal("ERRORE: Impossibile trovare 'YoubotCamera' in camera_link.children[0]")
+                        raise RuntimeError("Struttura .wbt non corrispondente (YoubotCamera)")
+                    
+                    self.__node.get_logger().info('Trovato YoubotCamera')
+                    tiago_camera_rot = nodo_youbot_camera.getField('rotation')
+                    tiago_camera_tra = nodo_youbot_camera.getField('translation')
+                    
+                    self.tiago_M.append(tiago_camera_rot)
+                    self.tiago_M.append(tiago_camera_tra)
+                    self.R_tiltcamera_2_camera_link = rotations.matrix_from_axis_angle(tiago_camera_rot.getSFRotation())
+                    self.M_tiltcamera_2_camera_link = build_matrix_from_R(self.R_tiltcamera_2_camera_link)
+                    
+                    self.M_tilt_2_camera = transformations.concat(self.M_tiltcamera_2_camera_link, self.M_tilt_2_tiltcamera_link)
+                    self.quaternion_camera = transformations.pq_from_transform(self.M_tilt_2_camera)
 
-                            # MATRICI DI ROTAZIONE PAN_TILT_LINK
+                    self.__node.get_logger().info("Ricerca link telecamera completata.")
+                    # --- FINE MODIFICA CORRETTA ---
 
-                            self.R_pan_tilt_link = rotations.matrix_from_axis_angle(pan_tilt_link_rot.getSFRotation())
-                            self.M_pan_tilt_link = build_matrix_from_R(self.R_pan_tilt_link)
-                            self.quaternion_pan_tilt = transformations.pq_from_transform(self.M_pan_tilt_link)
+                if(robot_name.getSFString().__contains__("human_")):
 
-                            self.__node.get_logger().info('R_pan_tilt_link: \n' + str(self.R_pan_tilt_link))
-                            self.__node.get_logger().info('M_pan_tilt_link: \n' + str(self.M_pan_tilt_link))
+                    self.__node.get_logger().info('è stato trovato il nodo human')
+                    field_name = nodo_livello_1.getField('name')
 
-                            children_7 = nodo_pan_link_tilt.getField('children')                                                                      # LIVELLO 13      CHILDREN
-                            nodo_tilt_link = children_7.getMFNode(0)    
+                    self.__node.get_logger().info('Il campo contiene la parola human ' + str(k))
+                    self.__node.get_logger().info('Trovato ' + field_name.getSFString() + 'alla posizione ' + str(k))
+                    human_name = nodo_livello_1.getField('name')
+                    human_model = nodo_livello_1.getField('model')
+                    human_type = "human" # Tipo di oggetto
+                    human_size_x = 0.1
+                    human_size_y = 0.1
+                    human_size_z = 0.001
 
-                            self.__node.get_logger().info('Sono dentro tilt_link')
-                            tilt_link_rot = nodo_tilt_link.getField('rotation') 
-                            tilt_link_tra = nodo_tilt_link.getField('translation')  
+                    human_translation = nodo_livello_1.getField('translation')
+                    human_rotation = nodo_livello_1.getField('rotation')
+                    self.__node.get_logger().info("nome human: " + human_name.getSFString() )
+                    self.__node.get_logger().info("model human: " + human_model.getSFString() )
+                    self.__node.get_logger().info('Posizione assoluta ' + human_name.getSFString() + ' ' + str(human_translation.getSFVec3f()))
+                    self.__node.get_logger().info('Rotazione assoluta ' + human_name.getSFString() + ' ' + str(human_rotation.getSFRotation())+ '\n')    
 
-                            self.__node.get_logger().info('rotation_tilt_link: ' + str(tilt_link_rot.getSFRotation()))
-                            self.__node.get_logger().info('translation_tilt_link: ' + str(tilt_link_tra.getSFVec3f()))
+                    #############################
 
-                            # SALVATAGGIO TILT_LINK --> MOBILE 
-                            self.tilt_link.append(tilt_link_rot)
-                            self.tilt_link.append(tilt_link_tra)
+                    umano = ClassObject.ClassObject()
 
-                            self.R_tilt_odom = rotations.matrix_from_axis_angle(pan_tilt_link_rot.getSFRotation())
-                            self.M_tilt_odom = build_matrix_from_R(self.R_pan_tilt_link)
-                            self.quaternion_tilt_odom = transformations.pq_from_transform(self.M_pan_tilt_link)
+                    matrice_human = build_matrix(nodo_livello_1.getPose())
+                    matrice_human_inv = transformations.invert_transform(matrice_human)
 
-                            children_8 = nodo_tilt_link.getField('children') # CERCO IL FIELD CHILDENTRO IN ROBOT                                 # LIVELLO 15      CHILDREN
-                            nodo_livello_9 = children_8.getMFNode(0)   
+                    umano.setup(     human_name.getSFString(),
+                                        human_model.getSFString(),
+                                        human_type,
+                                        human_size_x,
+                                        human_size_y,
+                                        human_size_z,
+                                        human_translation.getSFVec3f(),
+                                        human_rotation.getSFRotation(),
+                                        matrice_human,
+                                        matrice_human_inv)
 
-                            self.__node.get_logger().info('Sono dentro camera_link')
-                            camera_link_rot = nodo_livello_9.getField('rotation')        
-                            camera_link_tra = nodo_livello_9.getField('translation')  
-                            self.__node.get_logger().info('rotation_camera_link: ' + str(camera_link_rot.getSFRotation()))
-                            self.__node.get_logger().info('translation_camera_link: ' + str(camera_link_tra.getSFVec3f()))
+                    self.objects_vector.append(umano)
 
-                            # SALVATAGGIO CAMERA_LINK
-                            self.camera_link.append(camera_link_rot)
-                            self.camera_link.append(camera_link_tra)
+            if(nodo_livello_1.getTypeName() == 'Solid'):    # Cerco il nodo Solid in base al nome
+                field_name = nodo_livello_1.getField('name')                
 
-                            self.R_tilt_2_tiltcamera_link = rotations.matrix_from_axis_angle(camera_link_rot.getSFRotation())
-                            self.M_tilt_2_tiltcamera_link  = build_matrix_from_R(self.R_tilt_2_tiltcamera_link)
+                if (field_name.getSFString().__contains__("marker_")):
+                    self.__node.get_logger().info('Il campo contiene la parola marker ' + str(k))
+                    self.__node.get_logger().info('Trovato ' + field_name.getSFString() + 'alla posizione ' + str(k))
+                    marker_name = nodo_livello_1.getField('name')
+                    marker_model = nodo_livello_1.getField('model')
+                    marker_type = "marker" # Tipo di oggetto
+                    marker_size_x = 0.1
+                    marker_size_y = 0.1
+                    marker_size_z = 0.001
 
-                            # self.R_camera_link = rotations.matrix_from_axis_angle(camera_link_rot.getSFRotation())
-                            # self.M_camera_link = build_matrix_from_R(self.R_camera_link)
+                    marker_translation = nodo_livello_1.getField('translation')
+                    marker_rotation = nodo_livello_1.getField('rotation')
+                    self.__node.get_logger().info("nome marker: " + marker_name.getSFString() )
+                    self.__node.get_logger().info("model marker: " + marker_model.getSFString() )
+                    self.__node.get_logger().info('Posizione assoluta ' + field_name.getSFString() + ' ' + str(marker_translation.getSFVec3f()))
+                    self.__node.get_logger().info('Rotazione assoluta ' + field_name.getSFString() + ' ' + str(marker_rotation.getSFRotation())+ '\n')    
 
-                            children_9 = nodo_livello_9.getField('children')                                                                      # LIVELLO 17      CHILDREN
-                            nodo_livello_10 = children_9.getMFNode(0)   
+                    #############################
 
-                            self.__node.get_logger().info('Sono dentro YoubotCamera')
-                            tiago_camera_rot = nodo_livello_10.getField('rotation') 
-                            tiago_camera_tra = nodo_livello_10.getField('translation')   
-                            self.__node.get_logger().info('rotation_YoubotCamera: ' + str(tiago_camera_rot.getSFRotation()))
-                            self.__node.get_logger().info('translation_YoubotCamera: ' + str(tiago_camera_tra.getSFVec3f()))
-                            
-                            self.tiago_M.append(tiago_camera_rot)
-                            self.tiago_M.append(tiago_camera_tra)
+                    marcatore = ClassObject.ClassObject()
 
-                            self.R_tiltcamera_2_camera_link = rotations.matrix_from_axis_angle(tiago_camera_rot.getSFRotation())
-                            self.M_tiltcamera_2_camera_link = build_matrix_from_R(self.R_tiltcamera_2_camera_link)
+                    matrice_marker = build_matrix(nodo_livello_1.getPose())
+                    matrice_marker_inv = transformations.invert_transform(matrice_marker)
 
-                            self.M_tilt_2_camera = transformations.concat(self.M_tiltcamera_2_camera_link,self.M_tilt_2_tiltcamera_link)
-                            self.quaternion_camera = transformations.pq_from_transform(self.M_tilt_2_camera)
+                    marcatore.setup(     marker_name.getSFString(),
+                                        marker_model.getSFString(),
+                                        marker_type,
+                                        marker_size_x,
+                                        marker_size_y,
+                                        marker_size_z,
+                                        marker_translation.getSFVec3f(),
+                                        marker_rotation.getSFRotation(),
+                                        matrice_marker,
+                                        matrice_marker_inv)
 
-                            # FINE MODIFICA 
+                    self.objects_vector.append(marcatore)
 
-                        if(robot_name.getSFString().__contains__("human_")):
-
-                                self.__node.get_logger().info('è stato trovato il nodo human')
-                                field_name = nodo_livello_1.getField('name')
-
-                                self.__node.get_logger().info('Il campo contiene la parola human ' + str(k))
-                                self.__node.get_logger().info('Trovato ' + field_name.getSFString() + 'alla posizione ' + str(k))
-                                human_name = nodo_livello_1.getField('name')
-                                human_model = nodo_livello_1.getField('model')
-                                human_type = "human" # Tipo di oggetto
-                                human_size_x = 0.1
-                                human_size_y = 0.1
-                                human_size_z = 0.001
-
-                                human_translation = nodo_livello_1.getField('translation')
-                                human_rotation = nodo_livello_1.getField('rotation')
-                                self.__node.get_logger().info("nome human: " + human_name.getSFString() )
-                                self.__node.get_logger().info("model human: " + human_model.getSFString() )
-                                self.__node.get_logger().info('Posizione assoluta ' + human_name.getSFString() + ' ' + str(human_translation.getSFVec3f()))
-                                self.__node.get_logger().info('Rotazione assoluta ' + human_name.getSFString() + ' ' + str(human_rotation.getSFRotation())+ '\n')   
-
-                                #############################
-
-                                umano = ClassObject.ClassObject()
-
-                                matrice_human = build_matrix(nodo_livello_1.getPose())
-                                matrice_human_inv = transformations.invert_transform(matrice_human)
-
-                                umano.setup(    human_name.getSFString(),
-                                                    human_model.getSFString(),
-                                                    human_type,
-                                                    human_size_x,
-                                                    human_size_y,
-                                                    human_size_z,
-                                                    human_translation.getSFVec3f(),
-                                                    human_rotation.getSFRotation(),
-                                                    matrice_human,
-                                                    matrice_human_inv)
-
-
-                                self.objects_vector.append(umano)
-
-
-
-                    if(nodo_livello_1.getTypeName() == 'Solid'):    # Cerco il nodo Door in base al nome
-                        field_name = nodo_livello_1.getField('name')                        
-
-                        if (field_name.getSFString().__contains__("marker_")):
-                            self.__node.get_logger().info('Il campo contiene la parola marker ' + str(k))
-                            self.__node.get_logger().info('Trovato ' + field_name.getSFString() + 'alla posizione ' + str(k))
-                            marker_name = nodo_livello_1.getField('name')
-                            marker_model = nodo_livello_1.getField('model')
-                            marker_type = "marker" # Tipo di oggetto
-                            marker_size_x = 0.1
-                            marker_size_y = 0.1
-                            marker_size_z = 0.001
-
-                            marker_translation = nodo_livello_1.getField('translation')
-                            marker_rotation = nodo_livello_1.getField('rotation')
-                            self.__node.get_logger().info("nome marker: " + marker_name.getSFString() )
-                            self.__node.get_logger().info("model marker: " + marker_model.getSFString() )
-                            self.__node.get_logger().info('Posizione assoluta ' + field_name.getSFString() + ' ' + str(marker_translation.getSFVec3f()))
-                            self.__node.get_logger().info('Rotazione assoluta ' + field_name.getSFString() + ' ' + str(marker_rotation.getSFRotation())+ '\n')   
-
-                            #############################
-
-                            marcatore = ClassObject.ClassObject()
-
-                            matrice_marker = build_matrix(nodo_livello_1.getPose())
-                            matrice_marker_inv = transformations.invert_transform(matrice_marker)
-
-                            marcatore.setup(    marker_name.getSFString(),
-                                                marker_model.getSFString(),
-                                                marker_type,
-                                                marker_size_x,
-                                                marker_size_y,
-                                                marker_size_z,
-                                                marker_translation.getSFVec3f(),
-                                                marker_rotation.getSFRotation(),
-                                                matrice_marker,
-                                                matrice_marker_inv)
-
-
-                            self.objects_vector.append(marcatore)
-
-                        # FINE OPERAZIONI SU NOD1 
-
+                # FINE OPERAZIONI SU NOD1 
+        
         # Ordinamento della objects_vector tramite attributo model
         self.objects_vector.sort(key = lambda x : x.model)
 
@@ -975,7 +963,7 @@ class YoubotDriver:
         self.TF_visual_link.transform.rotation.x = self.quaternion_visual[4]
         self.TF_visual_link.transform.rotation.y = self.quaternion_visual[5] 
         self.TF_visual_link.transform.rotation.z = self.quaternion_visual[6] 
-        self.TF_visual_link.transform.translation.x = 0.14   
+        self.TF_visual_link.transform.translation.x = 0.14    
         self.TF_visual_link.transform.translation.y = 0.0
         self.TF_visual_link.transform.translation.z = 0.343
 
@@ -988,7 +976,7 @@ class YoubotDriver:
         self.TF_pan_link.header.frame_id = 'visual_link'
         self.TF_pan_link.child_frame_id = 'pan_link'
 
-        # ******************* PAN_LINK   TILT_LINK ******************     ANGOLO VARIABILE 
+        # ******************* PAN_LINK    TILT_LINK ****************** ANGOLO VARIABILE 
 
         self.TF_pan_2_tilt = TransformStamped()
         self.TF_pan_2_tilt.header.stamp = self.__node.get_clock().now().to_msg()
@@ -996,12 +984,12 @@ class YoubotDriver:
         self.TF_pan_2_tilt.child_frame_id = 'tilt_link'
 
 
-        axis_angle_tilt = [self.tilt_link[0].getSFRotation()[0], self.tilt_link[0].getSFRotation()[1], self.tilt_link[0].getSFRotation()[2], self.tilt_link[0].getSFRotation()[3]]   # ROTAZIONE SU ASSE Z 
+        axis_angle_tilt = [self.tilt_link[0].getSFRotation()[0], self.tilt_link[0].getSFRotation()[1], self.tilt_link[0].getSFRotation()[2], self.tilt_link[0].getSFRotation()[3]]    # ROTAZIONE SU ASSE Z 
 
         # self.__node.get_logger().info('new axis_angle_tilt: ' + str(axis_angle_tilt))
 
-        R_tilt_link = rotations.matrix_from_axis_angle(axis_angle_tilt)         # VARIABILI
-        M_tilt_link = build_matrix_from_R(R_tilt_link)                            # VARIABILI 
+        R_tilt_link = rotations.matrix_from_axis_angle(axis_angle_tilt)       # VARIABILI
+        M_tilt_link = build_matrix_from_R(R_tilt_link)                          # VARIABILI 
         # M_tilt_relativo = transformations.concat(self.M_pan_tilt_link,M_tilt_link) # ROTO-TRASLAZIONE DA PANT_TILT_LINK A  PAN_TILT 
         M_tilt_relativo = transformations.concat(self.M_tilt_odom,M_tilt_link) # ROTO-TRASLAZIONE DA PANT_TILT_LINK A  PAN_TILT 
 
@@ -1049,9 +1037,9 @@ def quaternion_to_axis_angle(quaternion):
     # Extract angle of rotation
     angle = 2 * np.arccos(quaternion[0]) 
     if(angle == 0):
-             x_aa = 0.0 
-             y_aa = 0.0
-             z_aa = 1.0
+            x_aa = 0.0 
+            y_aa = 0.0
+            z_aa = 1.0
     else: 
 
         x_aa = quaternion[1] / np.sin(angle / 2)
@@ -1092,3 +1080,50 @@ def build_matrix_from_R(vettore_matrice):
         [0,0,0,1]
         ])
     return matrice
+    
+# Classe dummy per simulare la struttura che il tuo codice si aspetta
+class MockWebotsNode:
+    def __init__(self, robot):
+        self.robot = robot
+
+def main(args=None):
+    # 1. Inizializza il Supervisor di Webots
+    robot = Supervisor()
+
+    # 2. Crea l'istanza del driver
+    driver = YoubotDriver()
+
+    # 3. Crea i dati fittizi che il tuo metodo .init() si aspetta
+    # (Poiché il tuo codice legge 'properties', dobbiamo simularle)
+    mock_node = MockWebotsNode(robot)
+    
+    # Impostiamo le proprietà come da tuo codice (puoi modificare i valori x,y,z start)
+    properties = {
+        'laser': 'slamtec',         # Importante: seleziona il lidar presente nel mondo
+        'laser_slamtec_x': '0.2',   # Posizione relativa del lidar (offset)
+        'laser_slamtec_y': '0.0',
+        'laser_slamtec_z': '0.05',
+        'translation_x': '-10.5',   # Posizione iniziale robot (presa dal tuo mondo .wbt)
+        'translation_y': '11.5',
+        'translation_z': '0.095',
+        'rotation_x': '0.0',
+        'rotation_y': '0.0',
+        'rotation_z': '1.0',
+        'rotation_w': '0.0'         # Rotazione approssimata
+    }
+
+    # 4. Inizializza il driver ROS 2
+    try:
+        driver.init(mock_node, properties)
+    except Exception as e:
+        print(f"Errore durante init: {e}")
+
+    # 5. Ciclo principale di simulazione (Step Loop)
+    timestep = int(robot.getBasicTimeStep())
+    
+    while robot.step(timestep) != -1:
+        # Chiama la funzione step del driver che gestisce sensori e motori
+        driver.step()
+
+if __name__ == '__main__':
+    main()
