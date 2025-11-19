@@ -3,80 +3,115 @@ from rclpy.node import Node
 from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Twist
 
-class YoubotFullFrontAvoidance(Node):
+class YoubotSimpleAvoidance(Node):
     def __init__(self):
-        super().__init__('youbot_full_avoidance')
+        super().__init__('youbot_simple_avoidance')
 
         self.subscription = self.create_subscription(
             LaserScan, 'scan_webots', self.scan_callback, 10)
         self.publisher_ = self.create_publisher(Twist, 'rover_twist', 10)
         
-        self.get_logger().info('Logica FULL FRONT (180 gradi) Avviata')
+        self.get_logger().info('Logica Intelligente Avviata (Confronto Destra/Sinistra)')
 
     def scan_callback(self, msg):
         ranges = msg.ranges
-        
         if not ranges:
             return
-
-        # --- MAPPA INDICI SU 1800 RAGGI ---
-        # Centro = 900
-        # 90 gradi = 450 raggi (perché 1800/4 = 450)
         
-        ind_destra_inizio = 450  # Esattamente a destra (90°)
-        ind_centro = 900         # Esattamente avanti (0°)
-        ind_sinistra_fine = 1350 # Esattamente a sinistra (90°)
-
-        # --- 1. ESTRAZIONE SETTORI (Tutti i 900 raggi frontali) ---
+        num_raggi = len(ranges)
         
-        # Settore Destra-Frontale (da 90° destra fino al centro)
-        settore_destra = ranges[ind_destra_inizio : ind_centro]
+        # --- 1. DEFINIZIONE SETTORI (CORRETTO: Index 900 è FRONTE) ---
+        # Dai log: Index 0 (Back) è ostruito a 0.27m. Index 900 (B) aumenta andando indietro -> Guarda Avanti.
         
-        # Settore Sinistra-Frontale (dal centro fino a 90° sinistra)
-        settore_sinistra = ranges[ind_centro : ind_sinistra_fine]
+        centro = num_raggi // 2 # 900
+        
+        # Fronte: Solo 5 raggi centrali (come richiesto)
+        # centro è 900. Quindi da 898 a 903 (5 raggi)
+        front_ranges = ranges[centro-2 : centro+3]
+        
+        # Sinistra: Tutto ciò che è a sinistra del centro (Index 903 a 1350)
+        left_ranges = ranges[centro+3 : centro+450]
+        
+        # Destra: Tutto ciò che è a destra del centro (Index 450 a 898)
+        right_ranges = ranges[centro-450 : centro-2]
+        
+        # Retro (Debug): Index 0-100
+        rear_ranges = ranges[0:100] + ranges[-100:]
+        
+        # --- 2. FUNZIONE UTILITY ---
+        def get_min_dist(sector_ranges):
+            # Abbassato filtro a 0.02 per vedere ostacoli vicinissimi
+            validi = [r for r in sector_ranges if r > 0.02 and r != float('inf')]
+            return min(validi) if validi else 10.0
 
-        # --- 2. FUNZIONE PULIZIA ---
-        def get_min_clean(settore):
-            # Filtra valori nulli, inf o troppo vicini (errori)
-            validi = [r for r in settore if r > 0.05 and r != float('inf')]
-            if not validi:
-                return 10.0 # Libero
-            return min(validi)
+        min_front = get_min_dist(front_ranges)
+        min_left = get_min_dist(left_ranges)
+        min_right = get_min_dist(right_ranges)
+        min_rear = get_min_dist(rear_ranges)
 
-        min_destra = get_min_clean(settore_destra)
-        min_sinistra = get_min_clean(settore_sinistra)
-
-        # Il minimo globale davanti a noi
-        ostacolo_frontale = min(min_destra, min_sinistra)
-
-        # --- 3. LOGICA ---
+        # --- 3. LOGICA DI CONTROLLO ---
         cmd = Twist()
-        DISTANZA_STOP = 0.65 # Metri
+        
+        # Parametri aumentati per reattività
+        DISTANZA_SICUREZZA = 1.5
+        DISTANZA_CRITICA = 0.8
+        DISTANZA_EMERGENZA = 0.5
+        
+        self.get_logger().info(f'F: {min_front:.2f} L: {min_left:.2f} R: {min_right:.2f} B: {min_rear:.2f}')
 
-        if ostacolo_frontale < DISTANZA_STOP:
-            # OSTACOLO RILEVATO NEI 180 GRADI FRONTALI
+        # CHECK COLLISIONE FRONTALE CIECA (Side Pinch)
+        # Se F non vede nulla (10.0) ma L e R sono vicinissimi (< 0.2), siamo contro un muro!
+        side_pinch = (min_left < 0.2 and min_right < 0.2)
+
+        if min_front < DISTANZA_EMERGENZA or side_pinch:
+            # TROPPO VICINO o SCHIACCIATO: Indietro e Ruota
+            self.get_logger().info('EMERGENZA! Indietro')
+            cmd.linear.x = -0.3
+            cmd.angular.z = 1.0 
+            
+        elif min_front < DISTANZA_CRITICA:
+            # SITUAZIONE CRITICA: Stop e Ruota
             cmd.linear.x = 0.0
             
-            # Dove ho più spazio?
-            if min_sinistra > min_destra:
-                # Più spazio a sinistra -> Giro a Sinistra (Z positivo)
-                # (Nota: nel codice precedente avevo invertito la logica di sterzata per errore)
-                self.get_logger().info(f'Muro a Destra ({min_destra:.2f}m) -> Giro SX')
-                cmd.angular.z = 0.5
+            # Isteresi / Simmetria
+            delta = min_left - min_right
+            if abs(delta) < 0.2:
+                cmd.angular.z = 1.5 # Forza SX Veloce
+                self.get_logger().info('CRITICO (Simmetrico) -> Forza SX')
+            elif min_left > min_right:
+                cmd.angular.z = 1.5
+                self.get_logger().info('CRITICO! Giro SX')
             else:
-                # Più spazio a destra -> Giro a Destra (Z negativo)
-                self.get_logger().info(f'Muro a Sinistra ({min_sinistra:.2f}m) -> Giro DX')
-                cmd.angular.z = -0.5
+                cmd.angular.z = -1.5
+                self.get_logger().info('CRITICO! Giro DX')
+                
+        elif min_front < DISTANZA_SICUREZZA:
+            # RALLENTA E CURVA
+            cmd.linear.x = 0.4 * (min_front / DISTANZA_SICUREZZA)
+            
+            if min_left > min_right:
+                cmd.angular.z = 1.0
+                self.get_logger().info('Evito a SX')
+            else:
+                cmd.angular.z = -1.0
+                self.get_logger().info('Evito a DX')
+                
         else:
-            # AVANTI
-            cmd.linear.x = 0.4
+            # LIBERO
+            cmd.linear.x = 0.8
             cmd.angular.z = 0.0
+            
+            # Wall Following leggero ma reattivo
+            if min_left < 0.6:
+                cmd.angular.z = -0.4
+            elif min_right < 0.6:
+                cmd.angular.z = 0.4
 
         self.publisher_.publish(cmd)
 
 def main(args=None):
     rclpy.init(args=args)
-    node = YoubotFullFrontAvoidance()
+    node = YoubotSimpleAvoidance()
     try:
         rclpy.spin(node)
     except KeyboardInterrupt:
