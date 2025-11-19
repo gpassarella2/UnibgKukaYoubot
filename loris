@@ -1,34 +1,44 @@
 import rclpy
 from rclpy.node import Node
-from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy
-from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Twist
 
 class YoubotAutopilot(Node):
     def __init__(self):
         super().__init__('youbot_autopilot')
         
-        # --- CONFIGURAZIONE ---
-        self.distanza_sicurezza = 0.8
-        self.velocita_lineare = 0.5
-        self.velocita_rotazione = 0.6
-            
+        # --- CONFIGURAZIONE --
+        self.velocita_lineare = 0.5  # Velocità per andare avanti
+        self.velocita_rotazione = 0.0 # Impostata a zero per andare dritto
+        
         self.publisher_ = self.create_publisher(Twist, '/rover_twist', 10)
-        self.get_logger().info('Youbot Autopilot avviato.')
+        
+        # Chiama la funzione 'publish_cmd_vel' ogni 0.1 secondi (10 Hz)
+        timer_period = 0.1
+        self.timer = self.create_timer(timer_period, self.publish_cmd_vel)
+        
+        self.get_logger().info('Youbot Autopilot avviato. Movimento continuo impostato.')
 
-    def scan_callback(self, msg):
+    # Funzione chiamata dal timer
+    def publish_cmd_vel(self):
         cmd = Twist()
 
         cmd.linear.x = self.velocita_lineare
-        cmd.angular.z = 0.0
-        self.get_logger().info('Avanti tutta.')
-
-        # Pubblica il comando
+        cmd.angular.z = self.velocita_rotazione 
         self.publisher_.publish(cmd)
-
+        self.get_logger().info(f'Pubblicato: Avanti a {self.velocita_lineare} m/s.')
+    
 def main(args=None):
     rclpy.init(args=args)
     youbot_pilot = YoubotAutopilot()
+    
+    try:
+        rclpy.spin(youbot_pilot)
+    except KeyboardInterrupt:
+        pass
+        
+    # Pulisci e distruggi il nodo
+    youbot_pilot.destroy_node()
+    rclpy.shutdown()
 
 if __name__ == '__main__':
     main()
