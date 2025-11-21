@@ -1,0 +1,54 @@
+<?xml version="1.0" ?>
+
+<robot name="Youbot base"> 
+
+    <webots>
+
+        <!-- Questo mi conta le rototraslazioni tra robot e camera -->
+        <device reference="YoubotCamera" type="Camera">
+            <ros>
+                <enabled>true</enabled>
+                <updateRate>10</updateRate>
+                <topicName>/camera</topicName>
+                <alwaysOn>true</alwaysOn>
+            </ros>
+        </device>
+            
+        <!-- Device per il sensore che rileva la luce nell'ambiente -->
+         <!--  <plugin type="simulation.tiago_base_driver_clean.YoubotDriver"> -->      
+
+        <plugin type="webots_hospital_youbot.driver.YoubotDriver">
+
+            <!-- <laser>urg</laser> -->
+            <laser>slamtec</laser>
+
+
+            <!--    POSIZIONE LASER URG -->
+
+            <laser_urg_x>0.225</laser_urg_x>
+            <laser_urg_y>0.0</laser_urg_y>
+            <laser_urg_z>0.25</laser_urg_z>
+
+            <!--    POSIZIONE IDEALE PER IL LASER SLAMTEC RISPETTO A BASE_LINK -->
+
+            <laser_slamtec_x>0.21</laser_slamtec_x>
+            <laser_slamtec_y>0.0</laser_slamtec_y>
+            <laser_slamtec_z>0.229</laser_slamtec_z>
+
+
+            <!-- PARAMETRI POSIZIONE DEL ROBOT -->
+            <parametro> Parametro YoubotDriver</parametro>
+            <translation_x>-10.5</translation_x>
+            <translation_y>11.5</translation_y>
+            <translation_z>0.095</translation_z>
+
+            <rotation_x>0.0</rotation_x>
+            <rotation_y>0.0</rotation_y>
+            <rotation_z>0.0</rotation_z>
+            <rotation_w>1.0</rotation_w>
+
+
+        </plugin>
+    </webots>
+
+</robot>

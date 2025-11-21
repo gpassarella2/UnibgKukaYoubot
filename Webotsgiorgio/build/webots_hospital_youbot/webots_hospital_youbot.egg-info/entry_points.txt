@@ -1,0 +1,4 @@
+[console_scripts]
+driver = webots_hospital_youbot.driver:main
+human_driver = webots_hospital_youbot.human_driver:main
+youbot_move = webots_hospital_youbot.YoubotMove:main

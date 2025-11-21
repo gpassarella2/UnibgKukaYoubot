@@ -1,0 +1,57 @@
+running egg_info
+creating ../../build/webots/webots.egg-info
+writing ../../build/webots/webots.egg-info/PKG-INFO
+writing dependency_links to ../../build/webots/webots.egg-info/dependency_links.txt
+writing requirements to ../../build/webots/webots.egg-info/requires.txt
+writing top-level names to ../../build/webots/webots.egg-info/top_level.txt
+writing manifest file '../../build/webots/webots.egg-info/SOURCES.txt'
+reading manifest file '../../build/webots/webots.egg-info/SOURCES.txt'
+adding license file 'LICENSE'
+writing manifest file '../../build/webots/webots.egg-info/SOURCES.txt'
+running build
+running build_py
+creating /home/giorgio/Webots/build/webots/build
+creating /home/giorgio/Webots/build/webots/build/lib
+creating /home/giorgio/Webots/build/webots/build/lib/webots
+copying webots/my_robot_driver.py -> /home/giorgio/Webots/build/webots/build/lib/webots
+copying webots/__init__.py -> /home/giorgio/Webots/build/webots/build/lib/webots
+running install
+running install_lib
+creating /home/giorgio/Webots/install/webots/lib/python3.12/site-packages/webots
+copying /home/giorgio/Webots/build/webots/build/lib/webots/my_robot_driver.py -> /home/giorgio/Webots/install/webots/lib/python3.12/site-packages/webots
+copying /home/giorgio/Webots/build/webots/build/lib/webots/__init__.py -> /home/giorgio/Webots/install/webots/lib/python3.12/site-packages/webots
+byte-compiling /home/giorgio/Webots/install/webots/lib/python3.12/site-packages/webots/my_robot_driver.py to my_robot_driver.cpython-312.pyc
+byte-compiling /home/giorgio/Webots/install/webots/lib/python3.12/site-packages/webots/__init__.py to __init__.cpython-312.pyc
+running install_data
+creating /home/giorgio/Webots/install/webots/share/ament_index
+creating /home/giorgio/Webots/install/webots/share/ament_index/resource_index
+creating /home/giorgio/Webots/install/webots/share/ament_index/resource_index/packages
+copying resource/webots -> /home/giorgio/Webots/install/webots/share/ament_index/resource_index/packages
+creating /home/giorgio/Webots/install/webots/share/webots/launch
+copying launch/robot_launch_open.py -> /home/giorgio/Webots/install/webots/share/webots/launch
+copying launch/robot_launch.py -> /home/giorgio/Webots/install/webots/share/webots/launch
+copying launch/robot_launch_obstacle.py -> /home/giorgio/Webots/install/webots/share/webots/launch
+creating /home/giorgio/Webots/install/webots/share/webots/worlds
+copying worlds/progetto.wbt -> /home/giorgio/Webots/install/webots/share/webots/worlds
+copying worlds/progetto_monza.wbt -> /home/giorgio/Webots/install/webots/share/webots/worlds
+copying worlds/progetto_canada.wbt -> /home/giorgio/Webots/install/webots/share/webots/worlds
+copying worlds/progetto_silverstone.wbt -> /home/giorgio/Webots/install/webots/share/webots/worlds
+copying worlds/progetto_spa.wbt -> /home/giorgio/Webots/install/webots/share/webots/worlds
+copying worlds/progetto_final_path.wbt -> /home/giorgio/Webots/install/webots/share/webots/worlds
+copying worlds/progetto_level3.wbt -> /home/giorgio/Webots/install/webots/share/webots/worlds
+copying worlds/progetto_level3_obstacle.wbt -> /home/giorgio/Webots/install/webots/share/webots/worlds
+creating /home/giorgio/Webots/install/webots/share/webots/resource
+copying resource/Pioneer2.urdf -> /home/giorgio/Webots/install/webots/share/webots/resource
+copying resource/tinker.obj -> /home/giorgio/Webots/install/webots/share/webots/resource
+copying resource/canada.obj -> /home/giorgio/Webots/install/webots/share/webots/resource
+copying resource/monza.obj -> /home/giorgio/Webots/install/webots/share/webots/resource
+copying resource/silverstone.obj -> /home/giorgio/Webots/install/webots/share/webots/resource
+copying resource/spa.obj -> /home/giorgio/Webots/install/webots/share/webots/resource
+copying resource/final_path.obj -> /home/giorgio/Webots/install/webots/share/webots/resource
+copying resource/level1.obj -> /home/giorgio/Webots/install/webots/share/webots/resource
+copying resource/level2.obj -> /home/giorgio/Webots/install/webots/share/webots/resource
+copying package.xml -> /home/giorgio/Webots/install/webots/share/webots
+running install_egg_info
+Copying ../../build/webots/webots.egg-info to /home/giorgio/Webots/install/webots/lib/python3.12/site-packages/webots-0.0.0-py3.12.egg-info
+running install_scripts
+writing list of installed files to '/home/giorgio/Webots/build/webots/install.log'

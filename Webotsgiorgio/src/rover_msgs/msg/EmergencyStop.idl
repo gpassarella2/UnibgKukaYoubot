@@ -1,0 +1,10 @@
+module rover_msgs{
+module msg{
+     
+        struct EmergencyStop
+        	{
+                boolean stop;		// true when the emergency stop is active
+            };
+    };
+
+};

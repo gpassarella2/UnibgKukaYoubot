@@ -1,0 +1,323 @@
+// generated from rosidl_generator_py/resource/_idl_support.c.em
+// with input from rover_msgs:msg/RoverInfo.idl
+// generated code does not contain a copyright notice
+#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
+#include <Python.h>
+#include <stdbool.h>
+#ifndef _WIN32
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Wunused-function"
+#endif
+#include "numpy/ndarrayobject.h"
+#ifndef _WIN32
+# pragma GCC diagnostic pop
+#endif
+#include "rosidl_runtime_c/visibility_control.h"
+#include "rover_msgs/msg/detail/rover_info__struct.h"
+#include "rover_msgs/msg/detail/rover_info__functions.h"
+
+#include "rosidl_runtime_c/primitives_sequence.h"
+#include "rosidl_runtime_c/primitives_sequence_functions.h"
+
+
+ROSIDL_GENERATOR_C_EXPORT
+bool rover_msgs__msg__rover_info__convert_from_py(PyObject * _pymsg, void * _ros_message)
+{
+  // check that the passed message is of the expected Python class
+  {
+    char full_classname_dest[37];
+    {
+      char * class_name = NULL;
+      char * module_name = NULL;
+      {
+        PyObject * class_attr = PyObject_GetAttrString(_pymsg, "__class__");
+        if (class_attr) {
+          PyObject * name_attr = PyObject_GetAttrString(class_attr, "__name__");
+          if (name_attr) {
+            class_name = (char *)PyUnicode_1BYTE_DATA(name_attr);
+            Py_DECREF(name_attr);
+          }
+          PyObject * module_attr = PyObject_GetAttrString(class_attr, "__module__");
+          if (module_attr) {
+            module_name = (char *)PyUnicode_1BYTE_DATA(module_attr);
+            Py_DECREF(module_attr);
+          }
+          Py_DECREF(class_attr);
+        }
+      }
+      if (!class_name || !module_name) {
+        return false;
+      }
+      snprintf(full_classname_dest, sizeof(full_classname_dest), "%s.%s", module_name, class_name);
+    }
+    assert(strncmp("rover_msgs.msg._rover_info.RoverInfo", full_classname_dest, 36) == 0);
+  }
+  rover_msgs__msg__RoverInfo * ros_message = _ros_message;
+  {  // footprint
+    PyObject * field = PyObject_GetAttrString(_pymsg, "footprint");
+    if (!field) {
+      return false;
+    }
+    {
+      // TODO(dirk-thomas) use a better way to check the type before casting
+      assert(field->ob_type != NULL);
+      assert(field->ob_type->tp_name != NULL);
+      assert(strcmp(field->ob_type->tp_name, "numpy.ndarray") == 0);
+      PyArrayObject * seq_field = (PyArrayObject *)field;
+      Py_INCREF(seq_field);
+      assert(PyArray_NDIM(seq_field) == 1);
+      assert(PyArray_TYPE(seq_field) == NPY_FLOAT64);
+      Py_ssize_t size = 6;
+      double * dest = ros_message->footprint;
+      for (Py_ssize_t i = 0; i < size; ++i) {
+        double tmp = *(npy_float64 *)PyArray_GETPTR1(seq_field, i);
+        memcpy(&dest[i], &tmp, sizeof(double));
+      }
+      Py_DECREF(seq_field);
+    }
+    Py_DECREF(field);
+  }
+  {  // safety_margin
+    PyObject * field = PyObject_GetAttrString(_pymsg, "safety_margin");
+    if (!field) {
+      return false;
+    }
+    assert(PyFloat_Check(field));
+    ros_message->safety_margin = PyFloat_AS_DOUBLE(field);
+    Py_DECREF(field);
+  }
+  {  // min_lin_vel
+    PyObject * field = PyObject_GetAttrString(_pymsg, "min_lin_vel");
+    if (!field) {
+      return false;
+    }
+    assert(PyFloat_Check(field));
+    ros_message->min_lin_vel = PyFloat_AS_DOUBLE(field);
+    Py_DECREF(field);
+  }
+  {  // max_lin_vel
+    PyObject * field = PyObject_GetAttrString(_pymsg, "max_lin_vel");
+    if (!field) {
+      return false;
+    }
+    assert(PyFloat_Check(field));
+    ros_message->max_lin_vel = PyFloat_AS_DOUBLE(field);
+    Py_DECREF(field);
+  }
+  {  // min_ang_vel
+    PyObject * field = PyObject_GetAttrString(_pymsg, "min_ang_vel");
+    if (!field) {
+      return false;
+    }
+    assert(PyFloat_Check(field));
+    ros_message->min_ang_vel = PyFloat_AS_DOUBLE(field);
+    Py_DECREF(field);
+  }
+  {  // max_ang_vel
+    PyObject * field = PyObject_GetAttrString(_pymsg, "max_ang_vel");
+    if (!field) {
+      return false;
+    }
+    assert(PyFloat_Check(field));
+    ros_message->max_ang_vel = PyFloat_AS_DOUBLE(field);
+    Py_DECREF(field);
+  }
+  {  // max_lin_acc
+    PyObject * field = PyObject_GetAttrString(_pymsg, "max_lin_acc");
+    if (!field) {
+      return false;
+    }
+    assert(PyFloat_Check(field));
+    ros_message->max_lin_acc = PyFloat_AS_DOUBLE(field);
+    Py_DECREF(field);
+  }
+  {  // max_ang_acc
+    PyObject * field = PyObject_GetAttrString(_pymsg, "max_ang_acc");
+    if (!field) {
+      return false;
+    }
+    assert(PyFloat_Check(field));
+    ros_message->max_ang_acc = PyFloat_AS_DOUBLE(field);
+    Py_DECREF(field);
+  }
+  {  // max_cen_acc
+    PyObject * field = PyObject_GetAttrString(_pymsg, "max_cen_acc");
+    if (!field) {
+      return false;
+    }
+    assert(PyFloat_Check(field));
+    ros_message->max_cen_acc = PyFloat_AS_DOUBLE(field);
+    Py_DECREF(field);
+  }
+  {  // lin_resolution
+    PyObject * field = PyObject_GetAttrString(_pymsg, "lin_resolution");
+    if (!field) {
+      return false;
+    }
+    assert(PyFloat_Check(field));
+    ros_message->lin_resolution = PyFloat_AS_DOUBLE(field);
+    Py_DECREF(field);
+  }
+  {  // ang_resolution
+    PyObject * field = PyObject_GetAttrString(_pymsg, "ang_resolution");
+    if (!field) {
+      return false;
+    }
+    assert(PyFloat_Check(field));
+    ros_message->ang_resolution = PyFloat_AS_DOUBLE(field);
+    Py_DECREF(field);
+  }
+
+  return true;
+}
+
+ROSIDL_GENERATOR_C_EXPORT
+PyObject * rover_msgs__msg__rover_info__convert_to_py(void * raw_ros_message)
+{
+  /* NOTE(esteve): Call constructor of RoverInfo */
+  PyObject * _pymessage = NULL;
+  {
+    PyObject * pymessage_module = PyImport_ImportModule("rover_msgs.msg._rover_info");
+    assert(pymessage_module);
+    PyObject * pymessage_class = PyObject_GetAttrString(pymessage_module, "RoverInfo");
+    assert(pymessage_class);
+    Py_DECREF(pymessage_module);
+    _pymessage = PyObject_CallObject(pymessage_class, NULL);
+    Py_DECREF(pymessage_class);
+    if (!_pymessage) {
+      return NULL;
+    }
+  }
+  rover_msgs__msg__RoverInfo * ros_message = (rover_msgs__msg__RoverInfo *)raw_ros_message;
+  {  // footprint
+    PyObject * field = NULL;
+    field = PyObject_GetAttrString(_pymessage, "footprint");
+    if (!field) {
+      return NULL;
+    }
+    assert(field->ob_type != NULL);
+    assert(field->ob_type->tp_name != NULL);
+    assert(strcmp(field->ob_type->tp_name, "numpy.ndarray") == 0);
+    PyArrayObject * seq_field = (PyArrayObject *)field;
+    assert(PyArray_NDIM(seq_field) == 1);
+    assert(PyArray_TYPE(seq_field) == NPY_FLOAT64);
+    assert(sizeof(npy_float64) == sizeof(double));
+    npy_float64 * dst = (npy_float64 *)PyArray_GETPTR1(seq_field, 0);
+    double * src = &(ros_message->footprint[0]);
+    memcpy(dst, src, 6 * sizeof(double));
+    Py_DECREF(field);
+  }
+  {  // safety_margin
+    PyObject * field = NULL;
+    field = PyFloat_FromDouble(ros_message->safety_margin);
+    {
+      int rc = PyObject_SetAttrString(_pymessage, "safety_margin", field);
+      Py_DECREF(field);
+      if (rc) {
+        return NULL;
+      }
+    }
+  }
+  {  // min_lin_vel
+    PyObject * field = NULL;
+    field = PyFloat_FromDouble(ros_message->min_lin_vel);
+    {
+      int rc = PyObject_SetAttrString(_pymessage, "min_lin_vel", field);
+      Py_DECREF(field);
+      if (rc) {
+        return NULL;
+      }
+    }
+  }
+  {  // max_lin_vel
+    PyObject * field = NULL;
+    field = PyFloat_FromDouble(ros_message->max_lin_vel);
+    {
+      int rc = PyObject_SetAttrString(_pymessage, "max_lin_vel", field);
+      Py_DECREF(field);
+      if (rc) {
+        return NULL;
+      }
+    }
+  }
+  {  // min_ang_vel
+    PyObject * field = NULL;
+    field = PyFloat_FromDouble(ros_message->min_ang_vel);
+    {
+      int rc = PyObject_SetAttrString(_pymessage, "min_ang_vel", field);
+      Py_DECREF(field);
+      if (rc) {
+        return NULL;
+      }
+    }
+  }
+  {  // max_ang_vel
+    PyObject * field = NULL;
+    field = PyFloat_FromDouble(ros_message->max_ang_vel);
+    {
+      int rc = PyObject_SetAttrString(_pymessage, "max_ang_vel", field);
+      Py_DECREF(field);
+      if (rc) {
+        return NULL;
+      }
+    }
+  }
+  {  // max_lin_acc
+    PyObject * field = NULL;
+    field = PyFloat_FromDouble(ros_message->max_lin_acc);
+    {
+      int rc = PyObject_SetAttrString(_pymessage, "max_lin_acc", field);
+      Py_DECREF(field);
+      if (rc) {
+        return NULL;
+      }
+    }
+  }
+  {  // max_ang_acc
+    PyObject * field = NULL;
+    field = PyFloat_FromDouble(ros_message->max_ang_acc);
+    {
+      int rc = PyObject_SetAttrString(_pymessage, "max_ang_acc", field);
+      Py_DECREF(field);
+      if (rc) {
+        return NULL;
+      }
+    }
+  }
+  {  // max_cen_acc
+    PyObject * field = NULL;
+    field = PyFloat_FromDouble(ros_message->max_cen_acc);
+    {
+      int rc = PyObject_SetAttrString(_pymessage, "max_cen_acc", field);
+      Py_DECREF(field);
+      if (rc) {
+        return NULL;
+      }
+    }
+  }
+  {  // lin_resolution
+    PyObject * field = NULL;
+    field = PyFloat_FromDouble(ros_message->lin_resolution);
+    {
+      int rc = PyObject_SetAttrString(_pymessage, "lin_resolution", field);
+      Py_DECREF(field);
+      if (rc) {
+        return NULL;
+      }
+    }
+  }
+  {  // ang_resolution
+    PyObject * field = NULL;
+    field = PyFloat_FromDouble(ros_message->ang_resolution);
+    {
+      int rc = PyObject_SetAttrString(_pymessage, "ang_resolution", field);
+      Py_DECREF(field);
+      if (rc) {
+        return NULL;
+      }
+    }
+  }
+
+  // ownership of _pymessage is transferred to the caller
+  return _pymessage;
+}

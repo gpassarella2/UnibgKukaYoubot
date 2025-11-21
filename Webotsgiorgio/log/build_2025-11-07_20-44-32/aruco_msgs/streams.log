@@ -1,0 +1,170 @@
+[0.040s] Invoking command in '/home/giorgio/Webots/build/aruco_msgs': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/giorgio/Webots/install/webots_hospital_youbot:/home/giorgio/Webots/install/webots:/home/giorgio/Webots/install/util:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/bin/cmake --build /home/giorgio/Webots/build/aruco_msgs -- -j2 -l2
+[0.180s] [  2%] Built target aruco_msgs__rosidl_generator_type_description
+[0.218s] [  2%] Built target ament_cmake_python_copy_aruco_msgs
+[0.252s] [  4%] Built target aruco_msgs__cpp
+[0.284s] [ 22%] Built target aruco_msgs__rosidl_generator_c
+[0.361s] [ 31%] Built target aruco_msgs__rosidl_typesupport_cpp
+[0.417s] [ 40%] Built target aruco_msgs__rosidl_typesupport_fastrtps_c
+[0.507s] [ 50%] Built target aruco_msgs__rosidl_typesupport_fastrtps_cpp
+[0.609s] [ 59%] Built target aruco_msgs__rosidl_typesupport_introspection_c
+[0.672s] [ 68%] Built target aruco_msgs__rosidl_typesupport_c
+[0.720s] running egg_info
+[0.740s] [ 77%] Built target aruco_msgs__rosidl_typesupport_introspection_cpp
+[0.768s] writing aruco_msgs.egg-info/PKG-INFO
+[0.768s] writing dependency_links to aruco_msgs.egg-info/dependency_links.txt
+[0.768s] writing top-level names to aruco_msgs.egg-info/top_level.txt
+[0.835s] [ 77%] Built target aruco_msgs
+[0.886s] reading manifest file 'aruco_msgs.egg-info/SOURCES.txt'
+[0.886s] writing manifest file 'aruco_msgs.egg-info/SOURCES.txt'
+[0.918s] [ 79%] Built target aruco_msgs__py
+[0.956s] [ 79%] Built target ament_cmake_python_build_aruco_msgs_egg
+[0.996s] [ 86%] Built target aruco_msgs__rosidl_generator_py
+[1.054s] [ 90%] Built target aruco_msgs_s__rosidl_typesupport_fastrtps_c
+[1.072s] [ 95%] Built target aruco_msgs_s__rosidl_typesupport_introspection_c
+[1.089s] [100%] Built target aruco_msgs_s__rosidl_typesupport_c
+[1.105s] Invoked command in '/home/giorgio/Webots/build/aruco_msgs' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/giorgio/Webots/install/webots_hospital_youbot:/home/giorgio/Webots/install/webots:/home/giorgio/Webots/install/util:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/bin/cmake --build /home/giorgio/Webots/build/aruco_msgs -- -j2 -l2
+[1.105s] Invoking command in '/home/giorgio/Webots/build/aruco_msgs': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/giorgio/Webots/install/webots_hospital_youbot:/home/giorgio/Webots/install/webots:/home/giorgio/Webots/install/util:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/bin/cmake --install /home/giorgio/Webots/build/aruco_msgs
+[1.116s] -- Install configuration: ""
+[1.116s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/share/ament_index/resource_index/rosidl_interfaces/aruco_msgs
+[1.116s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/share/aruco_msgs/msg/Marker.json
+[1.116s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/share/aruco_msgs/msg/MarkerArray.json
+[1.117s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/include/aruco_msgs/aruco_msgs
+[1.117s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/include/aruco_msgs/aruco_msgs/msg
+[1.117s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/include/aruco_msgs/aruco_msgs/msg/rosidl_generator_c__visibility_control.h
+[1.117s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/include/aruco_msgs/aruco_msgs/msg/marker.h
+[1.117s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/include/aruco_msgs/aruco_msgs/msg/detail
+[1.117s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/include/aruco_msgs/aruco_msgs/msg/detail/marker_array__type_support.h
+[1.117s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/include/aruco_msgs/aruco_msgs/msg/detail/marker_array__struct.h
+[1.117s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/include/aruco_msgs/aruco_msgs/msg/detail/marker__type_support.h
+[1.117s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/include/aruco_msgs/aruco_msgs/msg/detail/marker_array__description.c
+[1.121s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/include/aruco_msgs/aruco_msgs/msg/detail/marker__functions.h
+[1.122s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/include/aruco_msgs/aruco_msgs/msg/detail/marker_array__functions.c
+[1.122s] -- Installing: /home/giorgio/Webots/install/aruco_msgs/include/aruco_msgs/aruco_msgs/msg/detail/marker__type_support.c
+[1.122s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/include/aruco_msgs/aruco_msgs/msg/detail/marker__struct.h
+[1.122s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/include/aruco_msgs/aruco_msgs/msg/detail/marker_array__functions.h
+[1.122s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/include/aruco_msgs/aruco_msgs/msg/detail/marker__functions.c
+[1.122s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/include/aruco_msgs/aruco_msgs/msg/detail/marker__description.c
+[1.122s] -- Installing: /home/giorgio/Webots/install/aruco_msgs/include/aruco_msgs/aruco_msgs/msg/detail/marker_array__type_support.c
+[1.122s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/include/aruco_msgs/aruco_msgs/msg/marker_array.h
+[1.122s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/share/aruco_msgs/environment/library_path.sh
+[1.122s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/share/aruco_msgs/environment/library_path.dsv
+[1.122s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/lib/libaruco_msgs__rosidl_generator_c.so
+[1.123s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/include/aruco_msgs/aruco_msgs
+[1.123s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/include/aruco_msgs/aruco_msgs/msg
+[1.123s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/include/aruco_msgs/aruco_msgs/msg/detail
+[1.123s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/include/aruco_msgs/aruco_msgs/msg/detail/marker_array__rosidl_typesupport_fastrtps_c.h
+[1.123s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/include/aruco_msgs/aruco_msgs/msg/detail/marker__rosidl_typesupport_fastrtps_c.h
+[1.123s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/include/aruco_msgs/aruco_msgs/msg/rosidl_typesupport_fastrtps_c__visibility_control.h
+[1.123s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/lib/libaruco_msgs__rosidl_typesupport_fastrtps_c.so
+[1.123s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/include/aruco_msgs/aruco_msgs
+[1.123s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/include/aruco_msgs/aruco_msgs/msg
+[1.123s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/include/aruco_msgs/aruco_msgs/msg/detail
+[1.123s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/include/aruco_msgs/aruco_msgs/msg/detail/marker_array__builder.hpp
+[1.123s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/include/aruco_msgs/aruco_msgs/msg/detail/marker__builder.hpp
+[1.123s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/include/aruco_msgs/aruco_msgs/msg/detail/marker__struct.hpp
+[1.124s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/include/aruco_msgs/aruco_msgs/msg/detail/marker_array__type_support.hpp
+[1.124s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/include/aruco_msgs/aruco_msgs/msg/detail/marker__type_support.hpp
+[1.124s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/include/aruco_msgs/aruco_msgs/msg/detail/marker__traits.hpp
+[1.124s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/include/aruco_msgs/aruco_msgs/msg/detail/marker_array__struct.hpp
+[1.124s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/include/aruco_msgs/aruco_msgs/msg/detail/marker_array__traits.hpp
+[1.124s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/include/aruco_msgs/aruco_msgs/msg/marker.hpp
+[1.124s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/include/aruco_msgs/aruco_msgs/msg/rosidl_generator_cpp__visibility_control.hpp
+[1.124s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/include/aruco_msgs/aruco_msgs/msg/marker_array.hpp
+[1.124s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/include/aruco_msgs/aruco_msgs
+[1.124s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/include/aruco_msgs/aruco_msgs/msg
+[1.124s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/include/aruco_msgs/aruco_msgs/msg/detail
+[1.125s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/include/aruco_msgs/aruco_msgs/msg/detail/dds_fastrtps
+[1.125s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/include/aruco_msgs/aruco_msgs/msg/detail/marker__rosidl_typesupport_fastrtps_cpp.hpp
+[1.125s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/include/aruco_msgs/aruco_msgs/msg/detail/marker_array__rosidl_typesupport_fastrtps_cpp.hpp
+[1.125s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/include/aruco_msgs/aruco_msgs/msg/rosidl_typesupport_fastrtps_cpp__visibility_control.h
+[1.125s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/lib/libaruco_msgs__rosidl_typesupport_fastrtps_cpp.so
+[1.125s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/include/aruco_msgs/aruco_msgs
+[1.125s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/include/aruco_msgs/aruco_msgs/msg
+[1.125s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/include/aruco_msgs/aruco_msgs/msg/rosidl_typesupport_introspection_c__visibility_control.h
+[1.125s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/include/aruco_msgs/aruco_msgs/msg/detail
+[1.125s] -- Installing: /home/giorgio/Webots/install/aruco_msgs/include/aruco_msgs/aruco_msgs/msg/detail/marker__type_support.c
+[1.125s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/include/aruco_msgs/aruco_msgs/msg/detail/marker__rosidl_typesupport_introspection_c.h
+[1.125s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/include/aruco_msgs/aruco_msgs/msg/detail/marker_array__rosidl_typesupport_introspection_c.h
+[1.125s] -- Installing: /home/giorgio/Webots/install/aruco_msgs/include/aruco_msgs/aruco_msgs/msg/detail/marker_array__type_support.c
+[1.129s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/lib/libaruco_msgs__rosidl_typesupport_introspection_c.so
+[1.129s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/lib/libaruco_msgs__rosidl_typesupport_c.so
+[1.129s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/include/aruco_msgs/aruco_msgs
+[1.129s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/include/aruco_msgs/aruco_msgs/msg
+[1.129s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/include/aruco_msgs/aruco_msgs/msg/detail
+[1.129s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/include/aruco_msgs/aruco_msgs/msg/detail/marker__type_support.cpp
+[1.129s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/include/aruco_msgs/aruco_msgs/msg/detail/marker_array__rosidl_typesupport_introspection_cpp.hpp
+[1.129s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/include/aruco_msgs/aruco_msgs/msg/detail/marker__rosidl_typesupport_introspection_cpp.hpp
+[1.129s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/include/aruco_msgs/aruco_msgs/msg/detail/marker_array__type_support.cpp
+[1.129s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/lib/libaruco_msgs__rosidl_typesupport_introspection_cpp.so
+[1.129s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/lib/libaruco_msgs__rosidl_typesupport_cpp.so
+[1.129s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/share/aruco_msgs/environment/pythonpath.sh
+[1.129s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/share/aruco_msgs/environment/pythonpath.dsv
+[1.129s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/lib/python3.12/site-packages/aruco_msgs-5.0.4-py3.12.egg-info
+[1.129s] -- Installing: /home/giorgio/Webots/install/aruco_msgs/lib/python3.12/site-packages/aruco_msgs-5.0.4-py3.12.egg-info/PKG-INFO
+[1.129s] -- Installing: /home/giorgio/Webots/install/aruco_msgs/lib/python3.12/site-packages/aruco_msgs-5.0.4-py3.12.egg-info/dependency_links.txt
+[1.129s] -- Installing: /home/giorgio/Webots/install/aruco_msgs/lib/python3.12/site-packages/aruco_msgs-5.0.4-py3.12.egg-info/SOURCES.txt
+[1.129s] -- Installing: /home/giorgio/Webots/install/aruco_msgs/lib/python3.12/site-packages/aruco_msgs-5.0.4-py3.12.egg-info/top_level.txt
+[1.130s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/lib/python3.12/site-packages/aruco_msgs
+[1.130s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/lib/python3.12/site-packages/aruco_msgs/aruco_msgs_s__rosidl_typesupport_introspection_c.so
+[1.130s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/lib/python3.12/site-packages/aruco_msgs/_aruco_msgs_s.ep.rosidl_typesupport_fastrtps_c.c
+[1.130s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/lib/python3.12/site-packages/aruco_msgs/msg
+[1.130s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/lib/python3.12/site-packages/aruco_msgs/msg/__init__.py
+[1.130s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/lib/python3.12/site-packages/aruco_msgs/msg/_marker_array_s.c
+[1.130s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/lib/python3.12/site-packages/aruco_msgs/msg/_marker_s.c
+[1.130s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/lib/python3.12/site-packages/aruco_msgs/msg/_marker_array.py
+[1.130s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/lib/python3.12/site-packages/aruco_msgs/msg/_marker.py
+[1.131s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/lib/python3.12/site-packages/aruco_msgs/__init__.py
+[1.131s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/lib/python3.12/site-packages/aruco_msgs/aruco_msgs_s__rosidl_typesupport_c.so
+[1.131s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/lib/python3.12/site-packages/aruco_msgs/_aruco_msgs_s.ep.rosidl_typesupport_introspection_c.c
+[1.131s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/lib/python3.12/site-packages/aruco_msgs/_aruco_msgs_s.ep.rosidl_typesupport_c.c
+[1.131s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/lib/python3.12/site-packages/aruco_msgs/aruco_msgs_s__rosidl_typesupport_fastrtps_c.so
+[1.165s] Listing '/home/giorgio/Webots/install/aruco_msgs/lib/python3.12/site-packages/aruco_msgs'...
+[1.165s] Listing '/home/giorgio/Webots/install/aruco_msgs/lib/python3.12/site-packages/aruco_msgs/msg'...
+[1.176s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/lib/python3.12/site-packages/aruco_msgs/aruco_msgs_s__rosidl_typesupport_fastrtps_c.so
+[1.176s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/lib/python3.12/site-packages/aruco_msgs/aruco_msgs_s__rosidl_typesupport_introspection_c.so
+[1.176s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/lib/python3.12/site-packages/aruco_msgs/aruco_msgs_s__rosidl_typesupport_c.so
+[1.178s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/lib/libaruco_msgs__rosidl_generator_py.so
+[1.178s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/share/aruco_msgs/msg/Marker.idl
+[1.178s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/share/aruco_msgs/msg/MarkerArray.idl
+[1.178s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/share/aruco_msgs/msg/Marker.msg
+[1.178s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/share/aruco_msgs/msg/MarkerArray.msg
+[1.178s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/share/ament_index/resource_index/package_run_dependencies/aruco_msgs
+[1.178s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/share/ament_index/resource_index/parent_prefix_path/aruco_msgs
+[1.178s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/share/aruco_msgs/environment/ament_prefix_path.sh
+[1.179s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/share/aruco_msgs/environment/ament_prefix_path.dsv
+[1.179s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/share/aruco_msgs/environment/path.sh
+[1.179s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/share/aruco_msgs/environment/path.dsv
+[1.179s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/share/aruco_msgs/local_setup.bash
+[1.179s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/share/aruco_msgs/local_setup.sh
+[1.179s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/share/aruco_msgs/local_setup.zsh
+[1.179s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/share/aruco_msgs/local_setup.dsv
+[1.179s] -- Installing: /home/giorgio/Webots/install/aruco_msgs/share/aruco_msgs/package.dsv
+[1.183s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/share/ament_index/resource_index/packages/aruco_msgs
+[1.184s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/share/aruco_msgs/cmake/export_aruco_msgs__rosidl_generator_cExport.cmake
+[1.184s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/share/aruco_msgs/cmake/export_aruco_msgs__rosidl_generator_cExport-noconfig.cmake
+[1.184s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/share/aruco_msgs/cmake/export_aruco_msgs__rosidl_typesupport_fastrtps_cExport.cmake
+[1.185s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/share/aruco_msgs/cmake/export_aruco_msgs__rosidl_typesupport_fastrtps_cExport-noconfig.cmake
+[1.185s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/share/aruco_msgs/cmake/export_aruco_msgs__rosidl_generator_cppExport.cmake
+[1.185s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/share/aruco_msgs/cmake/export_aruco_msgs__rosidl_typesupport_fastrtps_cppExport.cmake
+[1.186s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/share/aruco_msgs/cmake/export_aruco_msgs__rosidl_typesupport_fastrtps_cppExport-noconfig.cmake
+[1.186s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/share/aruco_msgs/cmake/aruco_msgs__rosidl_typesupport_introspection_cExport.cmake
+[1.186s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/share/aruco_msgs/cmake/aruco_msgs__rosidl_typesupport_introspection_cExport-noconfig.cmake
+[1.186s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/share/aruco_msgs/cmake/aruco_msgs__rosidl_typesupport_cExport.cmake
+[1.186s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/share/aruco_msgs/cmake/aruco_msgs__rosidl_typesupport_cExport-noconfig.cmake
+[1.186s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/share/aruco_msgs/cmake/aruco_msgs__rosidl_typesupport_introspection_cppExport.cmake
+[1.186s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/share/aruco_msgs/cmake/aruco_msgs__rosidl_typesupport_introspection_cppExport-noconfig.cmake
+[1.187s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/share/aruco_msgs/cmake/aruco_msgs__rosidl_typesupport_cppExport.cmake
+[1.187s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/share/aruco_msgs/cmake/aruco_msgs__rosidl_typesupport_cppExport-noconfig.cmake
+[1.187s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/share/aruco_msgs/cmake/export_aruco_msgs__rosidl_generator_pyExport.cmake
+[1.188s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/share/aruco_msgs/cmake/export_aruco_msgs__rosidl_generator_pyExport-noconfig.cmake
+[1.188s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/share/aruco_msgs/cmake/rosidl_cmake-extras.cmake
+[1.189s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/share/aruco_msgs/cmake/ament_cmake_export_dependencies-extras.cmake
+[1.189s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/share/aruco_msgs/cmake/ament_cmake_export_include_directories-extras.cmake
+[1.189s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/share/aruco_msgs/cmake/ament_cmake_export_libraries-extras.cmake
+[1.189s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/share/aruco_msgs/cmake/ament_cmake_export_targets-extras.cmake
+[1.190s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/share/aruco_msgs/cmake/rosidl_cmake_export_typesupport_targets-extras.cmake
+[1.190s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/share/aruco_msgs/cmake/rosidl_cmake_export_typesupport_libraries-extras.cmake
+[1.190s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/share/aruco_msgs/cmake/aruco_msgsConfig.cmake
+[1.190s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/share/aruco_msgs/cmake/aruco_msgsConfig-version.cmake
+[1.190s] -- Up-to-date: /home/giorgio/Webots/install/aruco_msgs/share/aruco_msgs/package.xml
+[1.190s] Invoked command in '/home/giorgio/Webots/build/aruco_msgs' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/giorgio/Webots/install/webots_hospital_youbot:/home/giorgio/Webots/install/webots:/home/giorgio/Webots/install/util:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/bin/cmake --install /home/giorgio/Webots/build/aruco_msgs

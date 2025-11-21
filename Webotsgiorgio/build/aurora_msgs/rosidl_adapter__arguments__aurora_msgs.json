@@ -1,0 +1,7 @@
+{
+  "package_name": "aurora_msgs",
+  "non_idl_tuples": [
+    "/home/giorgio/Webots/src/aurora_msgs:msg/Object3D.msg",
+    "/home/giorgio/Webots/src/aurora_msgs:msg/Object3DArray.msg"
+  ]
+}

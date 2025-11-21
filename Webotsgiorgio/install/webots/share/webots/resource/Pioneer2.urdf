@@ -1,0 +1,29 @@
+<?xml version="1.0" ?>
+
+<robot name="Pioneer 2"> 
+
+    <webots>
+
+        <!-- Questo posso anche evitarlo, posso prendere i sensori direttamente da plugin tramite API-->
+
+        <device reference="lidar" type="Lidar">
+            <ros>
+                <enabled>true</enabled>
+                <updateRate>10</updateRate>
+                <scanRate>10</scanRate>
+                <topicName>/scan</topicName>
+                <alwaysOn>true</alwaysOn>
+            </ros>
+        </device>
+        <!-- Qui inserisco il plugin per il pilotaggio del Piooner 2 su Webots-->
+        <plugin type="webots.my_robot_driver.Pioneer2Driver">
+
+        </plugin>
+        
+    </webots>
+<!-- 
+    <supervisor>True<supervisor> -->
+
+</robot>
+
+

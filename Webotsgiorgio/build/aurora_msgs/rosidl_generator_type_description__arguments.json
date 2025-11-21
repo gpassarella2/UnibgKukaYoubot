@@ -1,0 +1,13 @@
+{
+  "package_name": "aurora_msgs",
+  "output_dir": "/home/giorgio/Webots/build/aurora_msgs/rosidl_generator_type_description/aurora_msgs",
+  "idl_tuples": [
+    "/home/giorgio/Webots/build/aurora_msgs/rosidl_adapter/aurora_msgs:msg/Object3D.idl",
+    "/home/giorgio/Webots/build/aurora_msgs/rosidl_adapter/aurora_msgs:msg/Object3DArray.idl"
+  ],
+  "include_paths": [
+    "std_msgs:/opt/ros/jazzy/share/std_msgs",
+    "builtin_interfaces:/opt/ros/jazzy/share/builtin_interfaces",
+    "geometry_msgs:/opt/ros/jazzy/share/geometry_msgs"
+  ]
+}

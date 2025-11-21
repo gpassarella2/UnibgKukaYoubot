@@ -1,0 +1,14 @@
+{
+	"backtraceGraph" : 
+	{
+		"commands" : [],
+		"files" : [],
+		"nodes" : []
+	},
+	"installers" : [],
+	"paths" : 
+	{
+		"build" : "aurora_msgs__py",
+		"source" : "/home/giorgio/Webots/build/aurora_msgs/aurora_msgs__py"
+	}
+}

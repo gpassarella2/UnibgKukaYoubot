@@ -1,0 +1,9 @@
+setup.py
+aurora_msgs/__init__.py
+aurora_msgs.egg-info/PKG-INFO
+aurora_msgs.egg-info/SOURCES.txt
+aurora_msgs.egg-info/dependency_links.txt
+aurora_msgs.egg-info/top_level.txt
+aurora_msgs/msg/__init__.py
+aurora_msgs/msg/_object3_d.py
+aurora_msgs/msg/_object3_d_array.py

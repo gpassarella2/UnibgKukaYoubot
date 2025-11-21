@@ -1,0 +1,170 @@
+[0.034s] Invoking command in '/home/giorgio/Webots/build/aurora_msgs': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/giorgio/Webots/install/webots_hospital_youbot:/home/giorgio/Webots/install/webots:/home/giorgio/Webots/install/util:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/bin/cmake --build /home/giorgio/Webots/build/aurora_msgs -- -j2 -l2
+[0.171s] [  2%] Built target aurora_msgs__rosidl_generator_type_description
+[0.189s] [  2%] Built target ament_cmake_python_copy_aurora_msgs
+[0.250s] [ 20%] Built target aurora_msgs__rosidl_generator_c
+[0.261s] [ 22%] Built target aurora_msgs__cpp
+[0.337s] [ 31%] Built target aurora_msgs__rosidl_typesupport_cpp
+[0.408s] [ 40%] Built target aurora_msgs__rosidl_typesupport_fastrtps_c
+[0.484s] [ 50%] Built target aurora_msgs__rosidl_typesupport_fastrtps_cpp
+[0.581s] [ 59%] Built target aurora_msgs__rosidl_typesupport_introspection_c
+[0.677s] [ 68%] Built target aurora_msgs__rosidl_typesupport_c
+[0.758s] [ 77%] Built target aurora_msgs__rosidl_typesupport_introspection_cpp
+[0.845s] [ 77%] Built target aurora_msgs
+[0.926s] [ 79%] Built target aurora_msgs__py
+[1.026s] [ 86%] Built target aurora_msgs__rosidl_generator_py
+[1.052s] running egg_info
+[1.110s] writing aurora_msgs.egg-info/PKG-INFO
+[1.111s] writing dependency_links to aurora_msgs.egg-info/dependency_links.txt
+[1.112s] writing top-level names to aurora_msgs.egg-info/top_level.txt
+[1.119s] [ 90%] Built target aurora_msgs_s__rosidl_typesupport_fastrtps_c
+[1.234s] [ 95%] Built target aurora_msgs_s__rosidl_typesupport_introspection_c
+[1.272s] reading manifest file 'aurora_msgs.egg-info/SOURCES.txt'
+[1.275s] writing manifest file 'aurora_msgs.egg-info/SOURCES.txt'
+[1.288s] [100%] Built target aurora_msgs_s__rosidl_typesupport_c
+[1.326s] [100%] Built target ament_cmake_python_build_aurora_msgs_egg
+[1.343s] Invoked command in '/home/giorgio/Webots/build/aurora_msgs' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/giorgio/Webots/install/webots_hospital_youbot:/home/giorgio/Webots/install/webots:/home/giorgio/Webots/install/util:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/bin/cmake --build /home/giorgio/Webots/build/aurora_msgs -- -j2 -l2
+[1.356s] Invoking command in '/home/giorgio/Webots/build/aurora_msgs': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/giorgio/Webots/install/webots_hospital_youbot:/home/giorgio/Webots/install/webots:/home/giorgio/Webots/install/util:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/bin/cmake --install /home/giorgio/Webots/build/aurora_msgs
+[1.368s] -- Install configuration: ""
+[1.368s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/share/ament_index/resource_index/rosidl_interfaces/aurora_msgs
+[1.368s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/share/aurora_msgs/msg/Object3D.json
+[1.369s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/share/aurora_msgs/msg/Object3DArray.json
+[1.369s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/include/aurora_msgs/aurora_msgs
+[1.369s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/include/aurora_msgs/aurora_msgs/msg
+[1.369s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/include/aurora_msgs/aurora_msgs/msg/rosidl_generator_c__visibility_control.h
+[1.369s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/include/aurora_msgs/aurora_msgs/msg/object3_d_array.h
+[1.369s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/include/aurora_msgs/aurora_msgs/msg/detail
+[1.369s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/include/aurora_msgs/aurora_msgs/msg/detail/object3_d_array__functions.c
+[1.373s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/include/aurora_msgs/aurora_msgs/msg/detail/object3_d_array__functions.h
+[1.373s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/include/aurora_msgs/aurora_msgs/msg/detail/object3_d__description.c
+[1.373s] -- Installing: /home/giorgio/Webots/install/aurora_msgs/include/aurora_msgs/aurora_msgs/msg/detail/object3_d__type_support.c
+[1.373s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/include/aurora_msgs/aurora_msgs/msg/detail/object3_d_array__struct.h
+[1.373s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/include/aurora_msgs/aurora_msgs/msg/detail/object3_d__struct.h
+[1.374s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/include/aurora_msgs/aurora_msgs/msg/detail/object3_d_array__type_support.h
+[1.374s] -- Installing: /home/giorgio/Webots/install/aurora_msgs/include/aurora_msgs/aurora_msgs/msg/detail/object3_d_array__type_support.c
+[1.374s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/include/aurora_msgs/aurora_msgs/msg/detail/object3_d_array__description.c
+[1.375s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/include/aurora_msgs/aurora_msgs/msg/detail/object3_d__type_support.h
+[1.376s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/include/aurora_msgs/aurora_msgs/msg/detail/object3_d__functions.h
+[1.376s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/include/aurora_msgs/aurora_msgs/msg/detail/object3_d__functions.c
+[1.376s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/include/aurora_msgs/aurora_msgs/msg/object3_d.h
+[1.376s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/share/aurora_msgs/environment/library_path.sh
+[1.376s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/share/aurora_msgs/environment/library_path.dsv
+[1.376s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/lib/libaurora_msgs__rosidl_generator_c.so
+[1.376s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/include/aurora_msgs/aurora_msgs
+[1.376s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/include/aurora_msgs/aurora_msgs/msg
+[1.376s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/include/aurora_msgs/aurora_msgs/msg/detail
+[1.376s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/include/aurora_msgs/aurora_msgs/msg/detail/object3_d__rosidl_typesupport_fastrtps_c.h
+[1.376s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/include/aurora_msgs/aurora_msgs/msg/detail/object3_d_array__rosidl_typesupport_fastrtps_c.h
+[1.376s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/include/aurora_msgs/aurora_msgs/msg/rosidl_typesupport_fastrtps_c__visibility_control.h
+[1.376s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/lib/libaurora_msgs__rosidl_typesupport_fastrtps_c.so
+[1.376s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/include/aurora_msgs/aurora_msgs
+[1.376s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/include/aurora_msgs/aurora_msgs/msg
+[1.376s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/include/aurora_msgs/aurora_msgs/msg/object3_d_array.hpp
+[1.376s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/include/aurora_msgs/aurora_msgs/msg/detail
+[1.377s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/include/aurora_msgs/aurora_msgs/msg/detail/object3_d_array__traits.hpp
+[1.377s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/include/aurora_msgs/aurora_msgs/msg/detail/object3_d__traits.hpp
+[1.377s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/include/aurora_msgs/aurora_msgs/msg/detail/object3_d_array__builder.hpp
+[1.377s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/include/aurora_msgs/aurora_msgs/msg/detail/object3_d_array__type_support.hpp
+[1.378s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/include/aurora_msgs/aurora_msgs/msg/detail/object3_d_array__struct.hpp
+[1.378s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/include/aurora_msgs/aurora_msgs/msg/detail/object3_d__struct.hpp
+[1.378s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/include/aurora_msgs/aurora_msgs/msg/detail/object3_d__builder.hpp
+[1.378s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/include/aurora_msgs/aurora_msgs/msg/detail/object3_d__type_support.hpp
+[1.379s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/include/aurora_msgs/aurora_msgs/msg/rosidl_generator_cpp__visibility_control.hpp
+[1.379s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/include/aurora_msgs/aurora_msgs/msg/object3_d.hpp
+[1.379s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/include/aurora_msgs/aurora_msgs
+[1.379s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/include/aurora_msgs/aurora_msgs/msg
+[1.379s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/include/aurora_msgs/aurora_msgs/msg/detail
+[1.379s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/include/aurora_msgs/aurora_msgs/msg/detail/dds_fastrtps
+[1.379s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/include/aurora_msgs/aurora_msgs/msg/detail/object3_d__rosidl_typesupport_fastrtps_cpp.hpp
+[1.379s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/include/aurora_msgs/aurora_msgs/msg/detail/object3_d_array__rosidl_typesupport_fastrtps_cpp.hpp
+[1.379s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/include/aurora_msgs/aurora_msgs/msg/rosidl_typesupport_fastrtps_cpp__visibility_control.h
+[1.379s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/lib/libaurora_msgs__rosidl_typesupport_fastrtps_cpp.so
+[1.379s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/include/aurora_msgs/aurora_msgs
+[1.379s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/include/aurora_msgs/aurora_msgs/msg
+[1.379s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/include/aurora_msgs/aurora_msgs/msg/rosidl_typesupport_introspection_c__visibility_control.h
+[1.379s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/include/aurora_msgs/aurora_msgs/msg/detail
+[1.379s] -- Installing: /home/giorgio/Webots/install/aurora_msgs/include/aurora_msgs/aurora_msgs/msg/detail/object3_d__type_support.c
+[1.380s] -- Installing: /home/giorgio/Webots/install/aurora_msgs/include/aurora_msgs/aurora_msgs/msg/detail/object3_d_array__type_support.c
+[1.380s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/include/aurora_msgs/aurora_msgs/msg/detail/object3_d_array__rosidl_typesupport_introspection_c.h
+[1.380s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/include/aurora_msgs/aurora_msgs/msg/detail/object3_d__rosidl_typesupport_introspection_c.h
+[1.380s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/lib/libaurora_msgs__rosidl_typesupport_introspection_c.so
+[1.381s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/lib/libaurora_msgs__rosidl_typesupport_c.so
+[1.381s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/include/aurora_msgs/aurora_msgs
+[1.381s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/include/aurora_msgs/aurora_msgs/msg
+[1.381s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/include/aurora_msgs/aurora_msgs/msg/detail
+[1.382s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/include/aurora_msgs/aurora_msgs/msg/detail/object3_d_array__type_support.cpp
+[1.382s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/include/aurora_msgs/aurora_msgs/msg/detail/object3_d_array__rosidl_typesupport_introspection_cpp.hpp
+[1.382s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/include/aurora_msgs/aurora_msgs/msg/detail/object3_d__type_support.cpp
+[1.382s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/include/aurora_msgs/aurora_msgs/msg/detail/object3_d__rosidl_typesupport_introspection_cpp.hpp
+[1.382s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/lib/libaurora_msgs__rosidl_typesupport_introspection_cpp.so
+[1.382s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/lib/libaurora_msgs__rosidl_typesupport_cpp.so
+[1.382s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/share/aurora_msgs/environment/pythonpath.sh
+[1.382s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/share/aurora_msgs/environment/pythonpath.dsv
+[1.382s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/lib/python3.12/site-packages/aurora_msgs-5.0.4-py3.12.egg-info
+[1.382s] -- Installing: /home/giorgio/Webots/install/aurora_msgs/lib/python3.12/site-packages/aurora_msgs-5.0.4-py3.12.egg-info/PKG-INFO
+[1.382s] -- Installing: /home/giorgio/Webots/install/aurora_msgs/lib/python3.12/site-packages/aurora_msgs-5.0.4-py3.12.egg-info/dependency_links.txt
+[1.382s] -- Installing: /home/giorgio/Webots/install/aurora_msgs/lib/python3.12/site-packages/aurora_msgs-5.0.4-py3.12.egg-info/SOURCES.txt
+[1.382s] -- Installing: /home/giorgio/Webots/install/aurora_msgs/lib/python3.12/site-packages/aurora_msgs-5.0.4-py3.12.egg-info/top_level.txt
+[1.383s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/lib/python3.12/site-packages/aurora_msgs
+[1.383s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/lib/python3.12/site-packages/aurora_msgs/aurora_msgs_s__rosidl_typesupport_c.so
+[1.383s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/lib/python3.12/site-packages/aurora_msgs/msg
+[1.383s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/lib/python3.12/site-packages/aurora_msgs/msg/__init__.py
+[1.383s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/lib/python3.12/site-packages/aurora_msgs/msg/_object3_d.py
+[1.383s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/lib/python3.12/site-packages/aurora_msgs/msg/_object3_d_array_s.c
+[1.383s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/lib/python3.12/site-packages/aurora_msgs/msg/_object3_d_array.py
+[1.383s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/lib/python3.12/site-packages/aurora_msgs/msg/_object3_d_s.c
+[1.384s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/lib/python3.12/site-packages/aurora_msgs/__init__.py
+[1.384s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/lib/python3.12/site-packages/aurora_msgs/_aurora_msgs_s.ep.rosidl_typesupport_introspection_c.c
+[1.384s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/lib/python3.12/site-packages/aurora_msgs/_aurora_msgs_s.ep.rosidl_typesupport_fastrtps_c.c
+[1.384s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/lib/python3.12/site-packages/aurora_msgs/aurora_msgs_s__rosidl_typesupport_introspection_c.so
+[1.384s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/lib/python3.12/site-packages/aurora_msgs/_aurora_msgs_s.ep.rosidl_typesupport_c.c
+[1.384s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/lib/python3.12/site-packages/aurora_msgs/aurora_msgs_s__rosidl_typesupport_fastrtps_c.so
+[1.461s] Listing '/home/giorgio/Webots/install/aurora_msgs/lib/python3.12/site-packages/aurora_msgs'...
+[1.461s] Listing '/home/giorgio/Webots/install/aurora_msgs/lib/python3.12/site-packages/aurora_msgs/msg'...
+[1.473s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/lib/python3.12/site-packages/aurora_msgs/aurora_msgs_s__rosidl_typesupport_fastrtps_c.so
+[1.473s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/lib/python3.12/site-packages/aurora_msgs/aurora_msgs_s__rosidl_typesupport_introspection_c.so
+[1.474s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/lib/python3.12/site-packages/aurora_msgs/aurora_msgs_s__rosidl_typesupport_c.so
+[1.474s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/lib/libaurora_msgs__rosidl_generator_py.so
+[1.475s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/share/aurora_msgs/msg/Object3D.idl
+[1.475s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/share/aurora_msgs/msg/Object3DArray.idl
+[1.475s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/share/aurora_msgs/msg/Object3D.msg
+[1.475s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/share/aurora_msgs/msg/Object3DArray.msg
+[1.476s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/share/ament_index/resource_index/package_run_dependencies/aurora_msgs
+[1.476s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/share/ament_index/resource_index/parent_prefix_path/aurora_msgs
+[1.476s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/share/aurora_msgs/environment/ament_prefix_path.sh
+[1.478s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/share/aurora_msgs/environment/ament_prefix_path.dsv
+[1.478s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/share/aurora_msgs/environment/path.sh
+[1.478s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/share/aurora_msgs/environment/path.dsv
+[1.478s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/share/aurora_msgs/local_setup.bash
+[1.478s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/share/aurora_msgs/local_setup.sh
+[1.479s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/share/aurora_msgs/local_setup.zsh
+[1.479s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/share/aurora_msgs/local_setup.dsv
+[1.479s] -- Installing: /home/giorgio/Webots/install/aurora_msgs/share/aurora_msgs/package.dsv
+[1.479s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/share/ament_index/resource_index/packages/aurora_msgs
+[1.479s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/share/aurora_msgs/cmake/export_aurora_msgs__rosidl_generator_cExport.cmake
+[1.479s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/share/aurora_msgs/cmake/export_aurora_msgs__rosidl_generator_cExport-noconfig.cmake
+[1.480s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/share/aurora_msgs/cmake/export_aurora_msgs__rosidl_typesupport_fastrtps_cExport.cmake
+[1.480s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/share/aurora_msgs/cmake/export_aurora_msgs__rosidl_typesupport_fastrtps_cExport-noconfig.cmake
+[1.480s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/share/aurora_msgs/cmake/export_aurora_msgs__rosidl_generator_cppExport.cmake
+[1.482s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/share/aurora_msgs/cmake/export_aurora_msgs__rosidl_typesupport_fastrtps_cppExport.cmake
+[1.482s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/share/aurora_msgs/cmake/export_aurora_msgs__rosidl_typesupport_fastrtps_cppExport-noconfig.cmake
+[1.482s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/share/aurora_msgs/cmake/aurora_msgs__rosidl_typesupport_introspection_cExport.cmake
+[1.482s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/share/aurora_msgs/cmake/aurora_msgs__rosidl_typesupport_introspection_cExport-noconfig.cmake
+[1.483s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/share/aurora_msgs/cmake/aurora_msgs__rosidl_typesupport_cExport.cmake
+[1.483s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/share/aurora_msgs/cmake/aurora_msgs__rosidl_typesupport_cExport-noconfig.cmake
+[1.483s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/share/aurora_msgs/cmake/aurora_msgs__rosidl_typesupport_introspection_cppExport.cmake
+[1.483s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/share/aurora_msgs/cmake/aurora_msgs__rosidl_typesupport_introspection_cppExport-noconfig.cmake
+[1.483s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/share/aurora_msgs/cmake/aurora_msgs__rosidl_typesupport_cppExport.cmake
+[1.483s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/share/aurora_msgs/cmake/aurora_msgs__rosidl_typesupport_cppExport-noconfig.cmake
+[1.483s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/share/aurora_msgs/cmake/export_aurora_msgs__rosidl_generator_pyExport.cmake
+[1.483s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/share/aurora_msgs/cmake/export_aurora_msgs__rosidl_generator_pyExport-noconfig.cmake
+[1.484s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/share/aurora_msgs/cmake/rosidl_cmake-extras.cmake
+[1.484s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/share/aurora_msgs/cmake/ament_cmake_export_dependencies-extras.cmake
+[1.484s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/share/aurora_msgs/cmake/ament_cmake_export_include_directories-extras.cmake
+[1.484s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/share/aurora_msgs/cmake/ament_cmake_export_libraries-extras.cmake
+[1.484s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/share/aurora_msgs/cmake/ament_cmake_export_targets-extras.cmake
+[1.484s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/share/aurora_msgs/cmake/rosidl_cmake_export_typesupport_targets-extras.cmake
+[1.485s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/share/aurora_msgs/cmake/rosidl_cmake_export_typesupport_libraries-extras.cmake
+[1.485s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/share/aurora_msgs/cmake/aurora_msgsConfig.cmake
+[1.486s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/share/aurora_msgs/cmake/aurora_msgsConfig-version.cmake
+[1.486s] -- Up-to-date: /home/giorgio/Webots/install/aurora_msgs/share/aurora_msgs/package.xml
+[1.497s] Invoked command in '/home/giorgio/Webots/build/aurora_msgs' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/giorgio/Webots/install/webots_hospital_youbot:/home/giorgio/Webots/install/webots:/home/giorgio/Webots/install/util:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/bin/cmake --install /home/giorgio/Webots/build/aurora_msgs

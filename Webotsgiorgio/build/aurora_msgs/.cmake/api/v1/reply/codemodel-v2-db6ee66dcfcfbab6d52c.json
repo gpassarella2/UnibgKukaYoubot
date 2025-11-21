@@ -1,0 +1,242 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"childIndexes" : 
+					[
+						1
+					],
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-.-0b4e9273f1d88218adb2.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.20"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						5,
+						6,
+						7,
+						8,
+						9,
+						10,
+						11,
+						12,
+						13,
+						14,
+						15,
+						16,
+						17,
+						18
+					]
+				},
+				{
+					"build" : "aurora_msgs__py",
+					"jsonFile" : "directory-aurora_msgs__py-e1cbebfa949b9792e5aa.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.20"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "/home/giorgio/Webots/build/aurora_msgs/aurora_msgs__py",
+					"targetIndexes" : 
+					[
+						4
+					]
+				}
+			],
+			"name" : "",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0,
+						1
+					],
+					"name" : "aurora_msgs",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5,
+						6,
+						7,
+						8,
+						9,
+						10,
+						11,
+						12,
+						13,
+						14,
+						15,
+						16,
+						17,
+						18
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "ament_cmake_python_build_aurora_msgs_egg::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ament_cmake_python_build_aurora_msgs_egg-433b25738bf1b85db83f.json",
+					"name" : "ament_cmake_python_build_aurora_msgs_egg",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ament_cmake_python_copy_aurora_msgs::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ament_cmake_python_copy_aurora_msgs-b10f22e16940c67f5e48.json",
+					"name" : "ament_cmake_python_copy_aurora_msgs",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "aurora_msgs::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-aurora_msgs-4599c20d8648fa2eafde.json",
+					"name" : "aurora_msgs",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "aurora_msgs__cpp::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-aurora_msgs__cpp-cf29ca5e6eab3963c9b3.json",
+					"name" : "aurora_msgs__cpp",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "aurora_msgs__py::@fa5c6f6a22cf0d348f82",
+					"jsonFile" : "target-aurora_msgs__py-071ef387036d27f7f398.json",
+					"name" : "aurora_msgs__py",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "aurora_msgs__rosidl_generator_c::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-aurora_msgs__rosidl_generator_c-2970ced3c6321dcd0087.json",
+					"name" : "aurora_msgs__rosidl_generator_c",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "aurora_msgs__rosidl_generator_py::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-aurora_msgs__rosidl_generator_py-f8010a1d7b31dd591c49.json",
+					"name" : "aurora_msgs__rosidl_generator_py",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "aurora_msgs__rosidl_generator_type_description::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-aurora_msgs__rosidl_generator_type_description-29ae90b9b0ce781799eb.json",
+					"name" : "aurora_msgs__rosidl_generator_type_description",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "aurora_msgs__rosidl_typesupport_c::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-aurora_msgs__rosidl_typesupport_c-7e6a9ea2d483056a88c9.json",
+					"name" : "aurora_msgs__rosidl_typesupport_c",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "aurora_msgs__rosidl_typesupport_cpp::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-aurora_msgs__rosidl_typesupport_cpp-609aeea62ad2a71de6ea.json",
+					"name" : "aurora_msgs__rosidl_typesupport_cpp",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "aurora_msgs__rosidl_typesupport_fastrtps_c::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-aurora_msgs__rosidl_typesupport_fastrtps_c-eac514179eacb95f8bb9.json",
+					"name" : "aurora_msgs__rosidl_typesupport_fastrtps_c",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "aurora_msgs__rosidl_typesupport_fastrtps_cpp::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-aurora_msgs__rosidl_typesupport_fastrtps_cpp-699bbe521fad641fcaf7.json",
+					"name" : "aurora_msgs__rosidl_typesupport_fastrtps_cpp",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "aurora_msgs__rosidl_typesupport_introspection_c::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-aurora_msgs__rosidl_typesupport_introspection_c-d1ec6d0c49027d6591fe.json",
+					"name" : "aurora_msgs__rosidl_typesupport_introspection_c",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "aurora_msgs__rosidl_typesupport_introspection_cpp::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-aurora_msgs__rosidl_typesupport_introspection_cpp-6379cceb61d51e531e71.json",
+					"name" : "aurora_msgs__rosidl_typesupport_introspection_cpp",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "aurora_msgs_s__rosidl_typesupport_c::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-aurora_msgs_s__rosidl_typesupport_c-06bbdcdc41f5b12a8390.json",
+					"name" : "aurora_msgs_s__rosidl_typesupport_c",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "aurora_msgs_s__rosidl_typesupport_fastrtps_c::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-aurora_msgs_s__rosidl_typesupport_fastrtps_c-648bf9280ffee6a3161e.json",
+					"name" : "aurora_msgs_s__rosidl_typesupport_fastrtps_c",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "aurora_msgs_s__rosidl_typesupport_introspection_c::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-aurora_msgs_s__rosidl_typesupport_introspection_c-b5d61ee9ca6be766a3dc.json",
+					"name" : "aurora_msgs_s__rosidl_typesupport_introspection_c",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "aurora_msgs_uninstall::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-aurora_msgs_uninstall-7254da166eb0a248f14e.json",
+					"name" : "aurora_msgs_uninstall",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "uninstall::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-uninstall-310e960f2e79f46a773b.json",
+					"name" : "uninstall",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/home/giorgio/Webots/build/aurora_msgs",
+		"source" : "/home/giorgio/Webots/src/aurora_msgs"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 6
+	}
+}
