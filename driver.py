@@ -13,9 +13,12 @@ import math
 from util import RoverInformation, ClassObject, LaserObject
 from controller import Supervisor
 import sys
+######
+#Prova telecamerca
+from sensor_msgs.msg import Image # <--- AGGIUNGI QUESTO
 
 ########## Dichiarazione dimensioni KUKA Youbot ##########
-raggioRuote = 0.0475
+raggioRuote = 0.05
 rotationRatio = 1
 slideRatio = 1
 HALF_DISTANCE_BETWEEN_WHEELS = 0.15  # L/2
@@ -204,19 +207,50 @@ class YoubotDriver:
         #self.rover_info_publisher.publish(self.messaggio_rover_info)
         
         
-        '''FROM TWIST TO WHEEL VELOCITIES (KUKA Youbot Mecanum)'''
-        vx = self.forward_speed      #avanti e indietro
-        vy = self.side_speed        #destra e sinistra
-        omega = self.angular_speed  #angolare
-        #AsseSxDx distanza asse sinistro destro dal centro
-        #AsseAP distanza asse Anteriore Posteriore dal centro
+        '''FROM TWIST TO WHEEL VELOCITIES (KUKA Youbot Mecanum Wheels)'''
+        vx = self.forward_speed      # avanti e indietro
+        vy = self.side_speed         # destra e sinistra
+        omega = self.angular_speed   # angolare
+        
+        # Mecanum wheel inverse kinematics for ABBA configuration
+        # WHEEL1 (front-left):  Interior-type at ( 0.228, -0.158)
+        # WHEEL2 (front-right): Exterior-type at ( 0.228,  0.158)
+        # WHEEL3 (back-left):   Exterior-type at (-0.228, -0.158)
+        # WHEEL4 (back-right):  Interior-type at (-0.228,  0.158)
+        
+        L = AsseAP + AsseSxDx  # ~0.393m
+        
+        # Inverse kinematics matrix for ABBA configuration
         M = np.array([
-            [1, -1, -(AsseAP + AsseSxDx)],
-            [1,  1,  (AsseAP + AsseSxDx)],
-            [1,  1, -(AsseAP + AsseSxDx)],
-            [1, -1,  (AsseAP + AsseSxDx)]
+            [ 1,  1, -L],  # wheel1: front-left  (Interior)
+            [ 1, -1,  L],  # wheel2: front-right (Exterior)
+            [ 1, -1, -L],  # wheel3: back-left   (Exterior)
+            [ 1,  1,  L]   # wheel4: back-right  (Interior)
         ])
+        
+        # Convert from desired body velocities to wheel angular velocities
         wheel_speeds = (1.0 / raggioRuote) * np.dot(M, np.array([vx, vy, omega]))
+        
+        # DEBUG: Log wheel speeds when lateral motion is commanded
+        if abs(vy) > 0.01:
+            self.__node.get_logger().info(
+                f'LATERAL MOTION DEBUG:\n'
+                f'  Input: vx={vx:.3f}, vy={vy:.3f}, omega={omega:.3f}\n'
+                f'  Wheel speeds (rad/s):\n'
+                f'    FL (wheel1): {wheel_speeds[0]:.3f}\n'
+                f'    FR (wheel2): {wheel_speeds[1]:.3f}\n'
+                f'    BL (wheel3): {wheel_speeds[2]:.3f}\n'
+                f'    BR (wheel4): {wheel_speeds[3]:.3f}'
+            )
+        
+        # Log actual wheel speeds (limit removed for testing)
+        max_speed = np.max(np.abs(wheel_speeds))
+        if max_speed > 0.1:
+            self.__node.get_logger().info(
+                f'Commanded wheel speeds: max={max_speed:.2f} rad/s, '
+                f'FL={wheel_speeds[0]:.2f}, FR={wheel_speeds[1]:.2f}, '
+                f'BL={wheel_speeds[2]:.2f}, BR={wheel_speeds[3]:.2f}'
+            )
                             
         # ************************ BEGIN ODOMETRY ********************************
         #invio dei comandi ai motori
@@ -281,8 +315,22 @@ class YoubotDriver:
 
                     
             self.laser_publisher.publish(self.messaggio_webots_scanner)
-            self.count_time_stamp_scan = 0.0
+            
+            raw_image = self.__camera.getImage()
+            if raw_image:
+                msg = Image()
+                msg.header.stamp = current_time
+                msg.header.frame_id = "camera_link"
+                msg.height = self.__camera.getHeight()
+                msg.width = self.__camera.getWidth()
+                msg.encoding = "bgra8" 
+                msg.is_bigendian = False
+                msg.step = 4 * self.__camera.getWidth()
+                msg.data = raw_image
+                self.camera_publisher.publish(msg)
+            # --- FINE CODICE TELECAMERA ---
 
+            self.count_time_stamp_scan = 0.0 #
         if self.count_time_stamp_odometry >= TIME_STAMP_ODOMETRY:
             self.odometry_publisher.publish(self.messaggio_odometria)
 
@@ -519,10 +567,10 @@ class YoubotDriver:
     # SETUP DEVICES IN SIMULAZIONE 
     def setup_robot_devices(self, properties):
 
-        self.__motor_front_left = self.__robot.getDevice('wheel1')
-        self.__motor_front_right = self.__robot.getDevice('wheel2')
-        self.__motor_back_left = self.__robot.getDevice('wheel3')
-        self.__motor_back_right = self.__robot.getDevice('wheel4')
+        self.__motor_front_left = self.__robot.getDevice('wheel2')
+        self.__motor_front_right = self.__robot.getDevice('wheel1')
+        self.__motor_back_left = self.__robot.getDevice('wheel4')
+        self.__motor_back_right = self.__robot.getDevice('wheel3')
 
         self.__sensor_left = None
         self.__sensor_right = None
@@ -571,6 +619,8 @@ class YoubotDriver:
         self.laser_publisher = self.__node.create_publisher(LaserScan, 'scan_webots', 1)
         self.rover_info_publisher = self.__node.create_publisher(RoverInfo, 'rover_info', 1)
         self.objects_publisher = self.__node.create_publisher(Object3DArray, 'visual_objects', 1)
+        #######################Camer 
+        self.camera_publisher = self.__node.create_publisher(Image, '/camera/image_raw', 1)
         
         self.__node.create_subscription(Twist, 'rover_twist', self.__cmd_vel_callback, 1)
         # self.__node.create_subscription(Twist,'camera_vel_sim',self.__camera_callback,1) 
@@ -703,15 +753,15 @@ class YoubotDriver:
                     #    posizione_laser_2 = [0.0, 0.0, 0.0]
                     #    laser_2_position.setSFVec3f(posizione_laser_2)
 
-                    if(self.laser_name == 'laser_slamtec'):
+                    #if(self.laser_name == 'laser_slamtec'):
 
                         # posizione_laser_1 = [0.0, 0.0, laser_1_position.getSFVec3f()[2]]
                         #posizione_laser_1 = [0.0, 0.0, 0.0]
 
                         #laser_1_position.setSFVec3f(posizione_laser_1)
 
-                        posizione_laser_2 = [self.laser_x, self.laser_y, self.laser_z]
-                        laser_2_position.setSFVec3f(posizione_laser_2)
+                        #posizione_laser_2 = [self.laser_x, self.laser_y, self.laser_z]
+                        #laser_2_position.setSFVec3f(posizione_laser_2)
 
                     #   FINE SCELTA DEI LASER 
                     
@@ -1080,50 +1130,6 @@ def build_matrix_from_R(vettore_matrice):
         [0,0,0,1]
         ])
     return matrice
-    
-# Classe dummy per simulare la struttura che il tuo codice si aspetta
-class MockWebotsNode:
-    def __init__(self, robot):
-        self.robot = robot
-
-def main(args=None):
-    # 1. Inizializza il Supervisor di Webots
-    robot = Supervisor()
-
-    # 2. Crea l'istanza del driver
-    driver = YoubotDriver()
-
-    # 3. Crea i dati fittizi che il tuo metodo .init() si aspetta
-    # (Poiché il tuo codice legge 'properties', dobbiamo simularle)
-    mock_node = MockWebotsNode(robot)
-    
-    # Impostiamo le proprietà come da tuo codice (puoi modificare i valori x,y,z start)
-    properties = {
-        'laser': 'slamtec',         # Importante: seleziona il lidar presente nel mondo
-        'laser_slamtec_x': '0.2',   # Posizione relativa del lidar (offset)
-        'laser_slamtec_y': '0.0',
-        'laser_slamtec_z': '0.05',
-        'translation_x': '-10.5',   # Posizione iniziale robot (presa dal tuo mondo .wbt)
-        'translation_y': '11.5',
-        'translation_z': '0.095',
-        'rotation_x': '0.0',
-        'rotation_y': '0.0',
-        'rotation_z': '1.0',
-        'rotation_w': '0.0'         # Rotazione approssimata
-    }
-
-    # 4. Inizializza il driver ROS 2
-    try:
-        driver.init(mock_node, properties)
-    except Exception as e:
-        print(f"Errore durante init: {e}")
-
-    # 5. Ciclo principale di simulazione (Step Loop)
-    timestep = int(robot.getBasicTimeStep())
-    
-    while robot.step(timestep) != -1:
-        # Chiama la funzione step del driver che gestisce sensori e motori
-        driver.step()
 
 if __name__ == '__main__':
     main()
