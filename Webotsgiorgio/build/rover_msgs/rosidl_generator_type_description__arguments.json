@@ -1,8 +1,0 @@
-{
-  "package_name": "rover_msgs",
-  "output_dir": "/home/giorgio/Webots/build/rover_msgs/rosidl_generator_type_description/rover_msgs",
-  "idl_tuples": [
-    "/home/giorgio/Webots/src/rover_msgs:msg/RoverInfo.idl",
-    "/home/giorgio/Webots/src/rover_msgs:msg/EmergencyStop.idl"
-  ]
-}
