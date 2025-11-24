@@ -5,6 +5,42 @@
 # The KUKA youBot is a powerful, educational robot that is especially designed for research and education in mobile manipulation, which counts as a key technology for professional service robotics. It consists of an omnidirectional platform, a five degree-of-freedom robot arm and a two-finger gripper.
 # template language: javascript
 
+
+
+
+
+
+DEF WHEEL1 InteriorWheel {
+  translation 0.228 -0.158 -0.055
+  anchor 0.228 -0.158 -0.055
+  name "wheel1"
+  sensorName "wheel1sensor"
+}
+DEF WHEEL2 ExteriorWheel {
+  translation 0.228 0.158 -0.055
+  anchor 0.228 0.158 -0.055
+  name "wheel2"
+  sensorName "wheel2sensor"
+}
+DEF WHEEL3 ExteriorWheel {
+  translation -0.228 -0.158 -0.055
+  anchor -0.228 -0.158 -0.055
+  name "wheel3"
+  sensorName "wheel3sensor"
+}
+DEF WHEEL4 InteriorWheel {
+  translation -0.228 0.158 -0.055
+  anchor -0.228 0.158 -0.055
+  name "wheel4"
+  sensorName "wheel4sensor"
+}
+
+
+
+
+
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/robots/robotis/op2/protos/MecanumWheel.proto"
+
 #EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/appearances/protos/MattePaint.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/robots/kuka/youbot/protos/BodyMesh.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/robots/kuka/youbot/protos/Arm0Mesh.proto"
