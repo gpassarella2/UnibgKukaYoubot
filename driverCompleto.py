@@ -201,7 +201,7 @@ class YoubotDriver:
             # self.__node.get_logger().info('print della matrice costruita post-setup inversa: ' + str(matrice_post_setup_inversa))
 
             self.inizio = False
-
+        
         '''PUBLISH ROVER DRIVER INFO '''
         
         #self.rover_info_publisher.publish(self.messaggio_rover_info)
@@ -212,20 +212,15 @@ class YoubotDriver:
         vy = self.side_speed         # destra e sinistra
         omega = self.angular_speed   # angolare
         
-        # Mecanum wheel inverse kinematics for ABBA configuration
-        # WHEEL1 (front-left):  Interior-type at ( 0.228, -0.158)
-        # WHEEL2 (front-right): Exterior-type at ( 0.228,  0.158)
-        # WHEEL3 (back-left):   Exterior-type at (-0.228, -0.158)
-        # WHEEL4 (back-right):  Interior-type at (-0.228,  0.158)
-        
+
         L = AsseAP + AsseSxDx  # ~0.393m
         
-        # Inverse kinematics matrix for ABBA configuration
+        
         M = np.array([
-            [ 1,  1, -L],  # wheel1: front-left  (Interior)
-            [ 1, -1,  L],  # wheel2: front-right (Exterior)
-            [ 1, -1, -L],  # wheel3: back-left   (Exterior)
-            [ 1,  1,  L]   # wheel4: back-right  (Interior)
+            [ 1,  1, -L],  # wheel2: front-left  (Interior)
+            [ 1, -1,  L],  # wheel1: front-right (Exterior)
+            [ 1, -1, -L],  # wheel4: back-left   (Exterior)
+            [ 1,  1,  L]   # wheel3: back-right  (Interior)
         ])
         
         # Convert from desired body velocities to wheel angular velocities
@@ -237,10 +232,10 @@ class YoubotDriver:
                 f'LATERAL MOTION DEBUG:\n'
                 f'  Input: vx={vx:.3f}, vy={vy:.3f}, omega={omega:.3f}\n'
                 f'  Wheel speeds (rad/s):\n'
-                f'    FL (wheel1): {wheel_speeds[0]:.3f}\n'
-                f'    FR (wheel2): {wheel_speeds[1]:.3f}\n'
-                f'    BL (wheel3): {wheel_speeds[2]:.3f}\n'
-                f'    BR (wheel4): {wheel_speeds[3]:.3f}'
+                f'    FR (wheel1): {wheel_speeds[1]:.3f}\n'
+                f'    FL (wheel2): {wheel_speeds[0]:.3f}\n'
+                f'    BR (wheel3): {wheel_speeds[3]:.3f}'
+                f'    BL (wheel4): {wheel_speeds[2]:.3f}\n'
             )
         
         # Log actual wheel speeds (limit removed for testing)
@@ -567,6 +562,7 @@ class YoubotDriver:
     # SETUP DEVICES IN SIMULAZIONE 
     def setup_robot_devices(self, properties):
 
+        
         self.__motor_front_left = self.__robot.getDevice('wheel2')
         self.__motor_front_right = self.__robot.getDevice('wheel1')
         self.__motor_back_left = self.__robot.getDevice('wheel4')
@@ -1133,4 +1129,3 @@ def build_matrix_from_R(vettore_matrice):
 
 if __name__ == '__main__':
     main()
-
