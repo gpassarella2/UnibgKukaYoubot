@@ -24,8 +24,8 @@ slideRatio = 1
 HALF_DISTANCE_BETWEEN_WHEELS = 0.15  # L/2
 
 #distanze dal centro del robot
-AsseAP = 0.228    # Distanza dal centro del robot all’asse anteriore/posteriore (Aggiornato da C)
-AsseSxDx = 0.158    # Distanza dal centro del robot al lato sinistro/destro
+AsseAP = 0.235    #Distanza dal centro del robot all’asse anteriore/posteriore
+AsseSxDx = 0.158    #Distanza dal centro del robot al lato sinistro/destro
 
 ########## Inizializzazione Dati iniziali ##########
 TIME_STEP = 32 # milliseconds
@@ -134,7 +134,7 @@ class YoubotDriver:
         self.messaggio_odometria.child_frame_id = "base_link"
         self.messaggio_odometria.pose.pose.position.x =    conversione_o2r_xq[0]
         self.messaggio_odometria.pose.pose.position.y = conversione_o2r_xq[1] 
-        self.messaggio_odometria.pose.pose.position.z = conversione_o2r_xq[2]      
+        self.messaggio_odometria.pose.pose.position.z = conversione_o2r_xq[2]       
         self.messaggio_odometria.pose.pose.orientation.x =    conversione_o2r_xq[4]
         self.messaggio_odometria.pose.pose.orientation.y = conversione_o2r_xq[5] 
         self.messaggio_odometria.pose.pose.orientation.z =  conversione_o2r_xq[6] 
@@ -213,7 +213,7 @@ class YoubotDriver:
         omega = self.angular_speed   # angolare
         
 
-        L = AsseAP + AsseSxDx  
+        L = AsseAP + AsseSxDx  # ~0.393m
         
         
         M = np.array([
@@ -596,10 +596,10 @@ class YoubotDriver:
 
         #********************* SET QoS for STRESA connection***********************
         # qos_profile = QoSProfile(
-        #     reliability=QoSReliabilityPolicy.RELIABLE,
-        #     history=QoSHistoryPolicy.KEEP_LAST,
-        #     durability=QoSDurabilityPolicy.TRANSIENT_LOCAL,
-        #     depth=10
+        #      reliability=QoSReliabilityPolicy.RELIABLE,
+        #      history=QoSHistoryPolicy.KEEP_LAST,
+        #      durability=QoSDurabilityPolicy.TRANSIENT_LOCAL,
+        #      depth=10
         # )
         #***************************************************************************
 
@@ -733,7 +733,7 @@ class YoubotDriver:
                     self.__node.get_logger().info('laser_slamtec trovato')
                     
                     #if(self.laser_name == 'laser_urg'):
-                    #    
+                    #   
                     #    posizione_laser_1 = [self.laser_x, self.laser_y, self.laser_z]
                     #    laser_1_position.setSFVec3f(posizione_laser_1)
 
@@ -891,15 +891,15 @@ class YoubotDriver:
                     matrice_human_inv = transformations.invert_transform(matrice_human)
 
                     umano.setup(     human_name.getSFString(),
-                                        human_model.getSFString(),
-                                        human_type,
-                                        human_size_x,
-                                        human_size_y,
-                                        human_size_z,
-                                        human_translation.getSFVec3f(),
-                                        human_rotation.getSFRotation(),
-                                        matrice_human,
-                                        matrice_human_inv)
+                                     human_model.getSFString(),
+                                     human_type,
+                                     human_size_x,
+                                     human_size_y,
+                                     human_size_z,
+                                     human_translation.getSFVec3f(),
+                                     human_rotation.getSFRotation(),
+                                     matrice_human,
+                                     matrice_human_inv)
 
                     self.objects_vector.append(umano)
 
@@ -931,15 +931,15 @@ class YoubotDriver:
                     matrice_marker_inv = transformations.invert_transform(matrice_marker)
 
                     marcatore.setup(     marker_name.getSFString(),
-                                        marker_model.getSFString(),
-                                        marker_type,
-                                        marker_size_x,
-                                        marker_size_y,
-                                        marker_size_z,
-                                        marker_translation.getSFVec3f(),
-                                        marker_rotation.getSFRotation(),
-                                        matrice_marker,
-                                        matrice_marker_inv)
+                                     marker_model.getSFString(),
+                                     marker_type,
+                                     marker_size_x,
+                                     marker_size_y,
+                                     marker_size_z,
+                                     marker_translation.getSFVec3f(),
+                                     marker_rotation.getSFRotation(),
+                                     matrice_marker,
+                                     matrice_marker_inv)
 
                     self.objects_vector.append(marcatore)
 
@@ -1001,7 +1001,7 @@ class YoubotDriver:
         self.TF_visual_link.transform.rotation.x = self.quaternion_visual[4]
         self.TF_visual_link.transform.rotation.y = self.quaternion_visual[5] 
         self.TF_visual_link.transform.rotation.z = self.quaternion_visual[6] 
-        self.TF_visual_link.transform.translation.x = 0.14    
+        self.TF_visual_link.transform.translation.x = 0.14   
         self.TF_visual_link.transform.translation.y = 0.0
         self.TF_visual_link.transform.translation.z = 0.343
 
