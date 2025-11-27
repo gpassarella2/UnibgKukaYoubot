@@ -1,55 +1,30 @@
-# ========= CINEMATICA YOU-BOT CON vx, vy, omega + K1, K2, K3 ==========
+# ======== CINEMATICA YOU-BOT — CASO A (cmd_vel + K1/K2/K3) ========
 
-vx = self.forward_speed
-vy = self.side_speed
-omega = self.angular_speed
+vx = self.forward_speed      # avanti/indietro
+vy = self.side_speed         # laterale
+omega = self.angular_speed   # rotazione
+
+# Guadagni come nel file C, ma applicati ai comandi manuali
+vx *= K2
+vy *= K3
+omega *= K1
 
 LX = 0.228
 LY = 0.158
 L = LX + LY
 r = raggioRuote
 
-# ---------------- STIMOLO 1: orientamento ----------------
-stim1_FL = -omega * K1
-stim1_FR =  omega * K1
-stim1_BL = -omega * K1
-stim1_BR =  omega * K1
+# MATRICE MECANUM (ordine B: wheel2, wheel1, wheel4, wheel3)
+M = np.array([
+    [ 1,  1,  L],   # front-left  (wheel2)
+    [ 1, -1, -L],   # front-right (wheel1)
+    [ 1, -1,  L],   # back-left   (wheel4)
+    [ 1,  1, -L]    # back-right  (wheel3)
+])
 
-# ---------------- STIMOLO 2: componente longitudinale vx ----------------
-stim2_FL = vx * K2
-stim2_FR = vx * K2
-stim2_BL = vx * K2
-stim2_BR = vx * K2
+wheel_speeds = (1.0 / r) * np.dot(M, np.array([vx, vy, omega]))
 
-# ---------------- STIMOLO 3: componente laterale vy ----------------
-stim3_FL = -vy * K3
-stim3_FR =  vy * K3
-stim3_BL =  vy * K3
-stim3_BR = -vy * K3
-
-# Somma dei 3 stimoli
-stim_FL = stim1_FL + stim2_FL + stim3_FL
-stim_FR = stim1_FR + stim2_FR + stim3_FR
-stim_BL = stim1_BL + stim2_BL + stim3_BL
-stim_BR = stim1_BR + stim2_BR + stim3_BR
-
-# Normalizzazione e mapping a velocità ruote
-den = (K1 + K2 + K3)
-FL = (stim_FL / den) * SPEED
-FR = (stim_FR / den) * SPEED
-BL = (stim_BL / den) * SPEED
-BR = (stim_BR / den) * SPEED
-
-# Bound come nel file C
-FL = max(min(FL, SPEED), -SPEED)
-FR = max(min(FR, SPEED), -SPEED)
-BL = max(min(BL, SPEED), -SPEED)
-BR = max(min(BR, SPEED), -SPEED)
-
-# Conversione in rad/s
-wheel_speeds = np.array([FL, FR, BL, BR]) / r
-
-# Ordine B: wheel2, wheel1, wheel4, wheel3
+# Invio ai motori con tuo ordine
 self.__motor_front_left.setVelocity(wheel_speeds[0])   # wheel2
 self.__motor_front_right.setVelocity(wheel_speeds[1])  # wheel1
 self.__motor_back_left.setVelocity(wheel_speeds[2])    # wheel4
