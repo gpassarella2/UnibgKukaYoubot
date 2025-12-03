@@ -36,3 +36,69 @@ void VelocityController::readKeyboard(int key) {
         return;
     }
 }
+
+
+
+
+
+
+---nel task
+// Assicurati di avere questi include in alto
+#include <cmath> 
+#include <algorithm>
+
+void VelocityController::task() {
+    int key = _kbhit();
+    readKeyboard(key); // Qui controlla se hai premuto 3
+
+    geometry_msgs::msg::dds_::Twist_ twist_msg;
+
+    // Se manual_drive è falso (hai premuto 3), esegue questo calcolo:
+    if (!manual_drive) {
+        
+        // 1. Calcolo distanze globali
+        double dx_global = target_x - current_x;
+        double dy_global = target_y - current_y;
+
+        // 2. Trasformazione nel sistema locale del robot (Matrice di Rotazione)
+        // Questo fa la "magia" del movimento fluido senza costanti PID.
+        double local_x = dx_global * std::cos(current_theta) + dy_global * std::sin(current_theta);
+        double local_y = -dx_global * std::sin(current_theta) + dy_global * std::cos(current_theta);
+
+        // 3. Calcolo distanza reale
+        double distance = std::sqrt(local_x*local_x + local_y*local_y);
+
+        if (distance > 0.05) {
+            // LOGICA DI MOVIMENTO PURAMENTE GEOMETRICA
+            
+            // Velocità Lineare = Proiezione frontale della distanza.
+            // Se il robot è storto, local_x è basso -> va piano.
+            // Se il robot è dritto, local_x è alto -> accelera.
+            twist_vx = local_x; 
+            
+            // Velocità Angolare = Angolo puro verso il target.
+            // Fa girare il robot finché local_y diventa 0.
+            twist_wz = std::atan2(local_y, local_x);
+            
+        } else {
+            // ARRIVATO SUL PUNTO (X, Y)
+            // Ora allineamento finale all'orientamento target_theta
+            double theta_err = target_theta - current_theta;
+            
+            // Normalizzazione angolo
+            twist_wz = std::atan2(std::sin(theta_err), std::cos(theta_err));
+            twist_vx = 0.0;
+            
+            // Stop se allineato
+            if(std::abs(twist_wz) < 0.05) twist_wz = 0.0;
+        }
+    }
+
+    // Pubblica i valori calcolati
+    twist_msg.linear().x(twist_vx);
+    twist_msg.linear().y(0.0);    
+    twist_msg.angular().z(twist_wz);
+    
+    twist_pub.publish(&twist_msg);
+    odometryCallback(this);
+}
