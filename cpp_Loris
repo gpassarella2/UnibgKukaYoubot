@@ -1,0 +1,245 @@
+#include "InputReaderActivity.hpp"
+#include <iostream>
+#include <iomanip>
+#include <cmath> // Necessario per sin, cos, atan2, sqrt, M_PI
+#include <stdio.h>
+#include <sys/select.h>
+#include <termios.h>
+
+using namespace stresa;
+
+namespace aurora {
+namespace components {
+
+// Funzione helper per la lettura non bloccante della tastiera
+int _kbhit() {
+    static const int STDIN = 0;
+    static bool initialized = false;
+    if (!initialized) {
+        termios term;
+        tcgetattr(STDIN, &term);
+        term.c_lflag &= ~ICANON;
+        tcsetattr(STDIN, TCSANOW, &term);
+        setbuf(stdin, NULL);
+        initialized = true;
+    }
+    int bytesWaiting;
+    ioctl(STDIN, FIONREAD, &bytesWaiting);
+    if (bytesWaiting == 0) return -1;
+    return getchar() - 48; // Converte ASCII in intero
+}
+
+// ============================================================
+// COSTRUTTORE E INIZIALIZZAZIONE
+// ============================================================
+InputReaderActivity::InputReaderActivity() : VActivity() {
+    registerPublisher(&twist_pub, "TwistPub", "rt/cmd_vel");
+    registerSubscriber(&odometrySub, "OdometrySub", "rt/odom");
+
+    twist_vx = 0.0;
+    twist_vy = 0.0;
+    twist_wz = 0.0;
+
+    // Stato Iniziale
+    current_x = 0.0;
+    current_y = 0.0;
+    current_theta = 0.0;
+
+    manual_drive = true;
+    goal_reached = true;
+}
+
+InputReaderActivity::~InputReaderActivity() {}
+
+// ============================================================
+// FUNZIONI DI UTILITÀ MATEMATICA
+// ============================================================
+
+// Normalizza l'angolo tra -PI e +PI (evita giri completi inutili)
+double InputReaderActivity::normalizeAngle(double angle) {
+    while (angle > M_PI) angle -= 2.0 * M_PI;
+    while (angle < -M_PI) angle += 2.0 * M_PI;
+    return angle;
+}
+
+// Converte Quaternione (Odom) in Angolo Yaw (Theta)
+double InputReaderActivity::quaternionToYaw(double x, double y, double z, double w) {
+    double siny_cosp = 2.0 * (w * z + x * y);
+    double cosy_cosp = 1.0 - 2.0 * (y * y + z * z);
+    return std::atan2(siny_cosp, cosy_cosp);
+}
+
+// ============================================================
+// CALLBACK ODOMETRIA (Legge dove siamo in tempo reale)
+// ============================================================
+void InputReaderActivity::odometryCallback(VariantActivity* va) {
+    InputReaderActivity* activity = (InputReaderActivity*) va;
+    SampleInfo m_info;
+    nav_msgs::msg::dds_::Odometry_ odo_msg;
+
+    if(activity->odometrySub.takeNextData(&odo_msg, &m_info)) {
+        // 1. Aggiorna posizione X, Y globali
+        activity->current_x = odo_msg.pose().pose().position().x();
+        activity->current_y = odo_msg.pose().pose().position().y();
+        
+        // 2. Aggiorna orientamento Theta (Yaw) dai quaternioni
+        double qx = odo_msg.pose().pose().orientation().x();
+        double qy = odo_msg.pose().pose().orientation().y();
+        double qz = odo_msg.pose().pose().orientation().z();
+        double qw = odo_msg.pose().pose().orientation().w();
+        
+        activity->current_theta = activity->quaternionToYaw(qx, qy, qz, qw);
+    }
+}
+
+// ============================================================
+// LEGGE DI CONTROLLO (Rho - Alpha - Beta)
+// Questa funzione viene chiamata in continuazione dentro task()
+// ============================================================
+void InputReaderActivity::runAutonomousControl() {
+    
+    // 1. Calcolo ERRORE rispetto al target GLOBALE
+    double dx = target_x - current_x;
+    double dy = target_y - current_y;
+
+    // 2. Trasformazione in coordinate polari (Rho, Alpha, Beta)
+    
+    // Rho: Distanza euclidea dal bersaglio 
+    double rho = std::sqrt(dx*dx + dy*dy);
+
+    // Alpha: Errore di puntamento (differenza tra dove guardo e dove è il punto)
+    double desired_heading = std::atan2(dy, dx);
+    double alpha = normalizeAngle(desired_heading - current_theta);
+
+    // Beta: Errore di orientamento finale (differenza tra orientamento target e direzione moto)
+    double beta = normalizeAngle(target_theta - desired_heading);
+
+    // 3. Verifica condizione di arrivo (tolleranza: 5 cm)
+    if (rho < 0.05) {
+        twist_vx = 0.0;
+        twist_wz = 0.0;
+        goal_reached = true;
+        manual_drive = true;
+        std::cout << ">>> TARGET RAGGIUNTO! Torno in manuale. <<<" << std::endl;
+        return;
+    }
+
+    // 4. Calcolo Velocità (Legge di controllo)
+    // k_rho: quanto veloce andare verso il punto
+    // k_alpha: quanto aggressivamente sterzare verso il punto
+    // k_beta: quanto correggere l'angolo finale
+    
+    double k_rho = 0.5;   
+    double k_alpha = 1.2; 
+    double k_beta = -0.3; // Deve essere negativo solitamente
+
+    // Adattamento in tempo reale:
+    // Se l'errore di angolo (alpha) è basso, vai veloce (vx alto).
+    // Se l'errore è alto, rallenta e gira.
+    
+    // Logica anti-avvitamento: se il punto è dietro le spalle (>90 gradi), 
+    // gira sul posto finché non lo vedi, poi parti.
+    if (std::abs(alpha) > M_PI / 2.0) {
+        twist_vx = 0.0; 
+        twist_wz = 0.6 * (alpha > 0 ? 1 : -1); 
+    } else {
+        twist_vx = k_rho * rho;
+        twist_wz = k_alpha * alpha + k_beta * beta;
+    }
+
+    // Saturazione di sicurezza
+    if (twist_vx > 0.5) twist_vx = 0.5; // Max 0.5 m/s
+    if (twist_wz > 1.0) twist_wz = 1.0; // Max 1.0 rad/s
+    if (twist_wz < -1.0) twist_wz = -1.0;
+    
+    // Debug per vedere come si "adatta"
+    // std::cout << "Rho: " << rho << " Alpha: " << alpha << " Wz: " << twist_wz << std::endl;
+}
+
+// ============================================================
+// TASK PRINCIPALE (Loop)
+// ============================================================
+void InputReaderActivity::task() {
+    // 1. Legge input utente (se presente)
+    int key = _kbhit();
+    if (key != -1) {
+        readKeyboard(key); 
+    }
+
+    // 2. Se siamo in modalità automatica, calcola la rotta
+    if (!manual_drive && !goal_reached) {
+        runAutonomousControl(); // <--- Qui avviene il calcolo real-time
+    }
+
+    // 3. Pubblica il comando di velocità (calcolato manuale o automatico)
+    geometry_msgs::msg::dds_::Twist_ twist_msg;
+    twist_msg.linear().x(twist_vx);
+    twist_msg.linear().y(0.0);    
+    twist_msg.angular().z(twist_wz);
+    twist_pub.publish(&twist_msg);
+
+    // 4. Aggiorna l'odometria per il prossimo ciclo
+    odometryCallback(this);
+}
+
+// ============================================================
+// GESTIONE TASTIERA E DEFINIZIONE TARGET
+// ============================================================
+void InputReaderActivity::readKeyboard(int key) {
+
+    // Tasti Manuali
+    if(key==8){ std::cout << " : X +\n"; twist_vx += 0.1; manual_drive = true; }
+    else if(key==2){ std::cout << " : X -\n"; twist_vx -= 0.1; manual_drive = true; }
+    else if(key==4){ std::cout << " : Z +\n"; twist_wz += 0.1; manual_drive = true; }
+    else if(key==6){ std::cout << " : Z -\n"; twist_wz -= 0.1; manual_drive = true; }
+    else if(key==0){ 
+        std::cout << " : STOP\n"; 
+        twist_vx = 0.0; twist_wz = 0.0; 
+        manual_drive = true; 
+    }
+    
+    // --- TASTO 3: ATTIVA PERCORSO ARCO A 90 GRADI ---
+    else if(key==3){
+        std::cout << "\n=== AVVIO PERCORSO AUTOMATICO (Arco 90 deg) ===\n";
+        
+        // 1. Definisci lo spostamento desiderato RELATIVO al robot
+        // Esempio: "Vai 2 metri avanti e 2 metri a sinistra rispetto a ora"
+        double local_x = 2.0; 
+        double local_y = 2.0; 
+        double local_theta = M_PI / 2.0; // +90 gradi
+
+        // 2. Converti in coordinate GLOBALI (Snapshot del Target)
+        // Usiamo la matrice di rotazione 2D basata su current_theta
+        double cos_th = cos(current_theta);
+        double sin_th = sin(current_theta);
+
+        // X_globale = X_robot + (X_locale ruotata)
+        target_x = current_x + (local_x * cos_th - local_y * sin_th);
+        target_y = current_y + (local_x * sin_th + local_y * cos_th);
+        
+        // Orientamento finale desiderato
+        target_theta = normalizeAngle(current_theta + local_theta);
+
+        // 3. Abilita il controllo
+        manual_drive = false;
+        goal_reached = false;
+
+        std::cout << "Start Pose: (" << current_x << ", " << current_y << ")\n";
+        std::cout << "Global Target: (" << target_x << ", " << target_y << ")\n";
+        std::cout << "Il robot calcolera' la curva in tempo reale...\n";
+    }
+}
+
+// ... [init, reconfigure, skip, missed, quit rimangono uguali] ...
+void InputReaderActivity::init() { std::cout << "Init. Premi '3' per arco automatico." << std::endl; }
+void InputReaderActivity::reconfigure() {}
+void InputReaderActivity::skip() {}
+void InputReaderActivity::missed() {}
+void InputReaderActivity::quit() {}
+
+// ... [twistConnectionCallback e roverOdomConnectionCallback rimangono uguali] ...
+void InputReaderActivity::twistConnectionCallback(VariantActivity* va, std::string port, bool matched, int num_connections) {}
+void InputReaderActivity::roverOdomConnectionCallback(VariantActivity* va, std::string port, bool matched, int num_connections) {}
+
+} // namespace components
+} // namespace aurora
