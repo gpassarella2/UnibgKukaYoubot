@@ -1,15 +1,60 @@
 /********************************************************************************
- * VelocityController.cpp
- ********************************************************************************/
+ *
+ * VelocityController
+ *
+ * Copyright (c) 2019
+ * All rights reserved.
+ *
+ * Davide Brugali, Università degli Studi di Bergamo
+ *
+ * -------------------------------------------------------------------------------
+ * File: VelocityController.cpp
+ * Created: May 5, 2019
+ * Author: <A HREF="mailto:brugali@unibg.it">Davide Brugali</A>
+ * -------------------------------------------------------------------------------
+ *
+ * This software is published under a dual-license: GNU Lesser General Public
+ * License LGPL 2.1 and BSD license. The dual-license implies that users of this
+ * code may choose which terms they prefer.
+ *
+ * -------------------------------------------------------------------------------
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * - Redistributions of source code must retain the above copyright
+ * notice, this list of conditions and the following disclaimer.
+ * - Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * - Neither the name of the University of Bergamo nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License LGPL as
+ * published by the Free Software Foundation, either version 2.1 of the
+ * License, or (at your option) any later version or the BSD license.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Lesser General Public License LGPL and the BSD license for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License LGPL and BSD license along with this program.
+ *
+ ******************************************************************************
+ */
 
 #include "VelocityController.hpp"
 #include <iostream>
 #include <sstream>
-#include <cmath> 
-#include <algorithm>
+#include <cmath> // Necessario per le formule matematiche
 #include <stdio.h>
 #include <sys/select.h>
 #include <termios.h>
+
 
 using namespace stresa;
 
@@ -19,7 +64,9 @@ namespace components {
 int _kbhit() {
     static const int STDIN = 0;
     static bool initialized = false;
+
     if (! initialized) {
+        // Use termios to turn off line buffering
         termios term;
         tcgetattr(STDIN, &term);
         term.c_lflag &= ~ICANON;
@@ -27,23 +74,30 @@ int _kbhit() {
         setbuf(stdin, NULL);
         initialized = true;
     }
+
     int bytesWaiting;
     ioctl(STDIN, FIONREAD, &bytesWaiting);
-    if(bytesWaiting == 0) return -1;
+    if(bytesWaiting == 0)
+    	return -1;
+    //return bytesWaiting;
     return getchar()-48;
 }
 
 VelocityController::VelocityController() : VActivity() {
+	// register the variant publisher
 	registerPublisher(&twist_pub, "TwistPub", "rt/cmd_vel");
 	registerSubscriber(&odometrySub, "OdometrySub", "rt/odom");
+	// registerPublisher(&planRequestPub, "PlanRequestPub", "trajectory2Drequest", planRequestConnectionCallback);
 
 	twist_vx = 0.0;
 	twist_vy = 0.0;
 	twist_wz = 0.0;
+
 	manual_drive = true;
 	
-	target_x = 0.0; 
-	target_y = 0.0; 
+	// Inizializzazione target
+	target_x = 0.0;
+	target_y = 0.0;
 	target_theta = 0.0;
 }
 
@@ -51,23 +105,49 @@ VelocityController::~VelocityController() {
 }
 
 void VelocityController::twistConnectionCallback(VariantActivity* va, std::string port, bool matched, int num_connections) {
-	std::cout << "TwistPub" << (matched ? " CONNECTED" : " DISCONNECTED") << std::endl;
+	std::cout << "VelocityController::" << port;
+	if(matched)
+		std::cout << "  CONNECTED #=" << num_connections << std::endl;
+	else
+		std::cout << "  DISCONNECTED #=" << num_connections << std::endl;
 }
 
+
 void VelocityController::roverOdomConnectionCallback(VariantActivity* va, std::string port, bool matched, int num_connections) {
-	std::cout << "OdometrySub" << (matched ? " CONNECTED" : " DISCONNECTED") << std::endl;
+	std::cout << "VelocityController::" << port;
+	if(matched)
+		std::cout << "  CONNECTED #=" << num_connections << std::endl;
+	else
+		std::cout << "  DISCONNECTED #=" << num_connections << std::endl;
 }
+
 
 void VelocityController::odometryCallback(VariantActivity* va) {
 	VelocityController* activity = (VelocityController*) va;
+
+// ################ USER DEFINED BEGIN ##################
+
+	// Take data
 	SampleInfo m_info;
-	
-	// --- MODIFICA: Aggiorniamo direttamente la variabile membro della classe ---
-	// Non creiamo una variabile locale 'odo_msg', usiamo activity->odo_msg
+	// NOTA: Usiamo la variabile membro activity->odo_msg invece di una locale
+	// nav_msgs::msg::dds_::Odometry_ odo_msg; 
+
 	if(activity->odometrySub.takeNextData(&activity->odo_msg, &m_info)) {
-		// Dati aggiornati in activity->odo_msg
+
+		/* Commentato per pulizia output, decommenta se vuoi vedere i numeri scorrere
+		std::cout << "ODOMETRY"<<std::endl<<"(";
+		std::cout<<std::setprecision(6)<< activity->odo_msg.pose().pose().position().x() << ", ";
+		std::cout<<std::setprecision(6)<< activity->odo_msg.pose().pose().position().y() << ", ";
+		std::cout<<std::setprecision(6)<< activity->odo_msg.pose().pose().orientation().z() << ") - (";
+		std::cout<<std::setprecision(6)<< activity->odo_msg.twist().twist().linear().x() << ", ";
+		std::cout<<std::setprecision(6)<< activity->odo_msg.twist().twist().linear().y() << ", ";
+		std::cout<<std::setprecision(6)<< activity->odo_msg.twist().twist().angular().z() << ")" << std::endl;
+		*/
 	}
+
+// ################ USER DEFINED END ####################
 }
+
 
 void VelocityController::init() {
 	std::cout << "VelocityController::init()" << std::endl;
@@ -75,103 +155,86 @@ void VelocityController::init() {
 }
 
 void VelocityController::reconfigure() {
+	std::cout << "VelocityController reconfigure" << std::endl;
 }
 
 void VelocityController::task() {
-	int key = _kbhit();
+	int key = 0;
+	key = _kbhit();
 	readKeyboard(key);
 
 	geometry_msgs::msg::dds_::Twist_ twist_msg;
 
-	if (!manual_drive) {
-		// --- USIAMO DIRETTAMENTE I COMANDI DELL'ODOMETRIA ---
+	if (manual_drive) {
+		// Logica manuale originale
+		twist_msg.linear().x(twist_vx);
+		twist_msg.linear().y(0.0);	
+		twist_msg.angular().z(twist_wz);
+	} 
+	else {
+		// --- LOGICA AUTOMATICA (Richiesta) ---
 		
-		// Accesso diretto alla struttura dati
-		double x_robot = odo_msg.pose().pose().position().x();
-		double y_robot = odo_msg.pose().pose().position().y();
-		double theta_robot = odo_msg.pose().pose().orientation().z();
+		// 1. Leggiamo direttamente dall'odometria salvata
+		double current_x = odo_msg.pose().pose().position().x();
+		double current_y = odo_msg.pose().pose().position().y();
+		double current_theta = odo_msg.pose().pose().orientation().z();
 
-		// 1. Calcola differenze
-		double dx = target_x - x_robot;
-		double dy = target_y - y_robot;
+		// 2. Calcoliamo la distanza
+		double dx = target_x - current_x;
+		double dy = target_y - current_y;
 		double dist = std::sqrt(dx*dx + dy*dy);
 
 		double desired_angle = 0.0;
 		double error_angle = 0.0;
 
-		// SE SIAMO LONTANI (> 10 cm)
+		// 3. Macchina a stati semplice: Avvicinamento -> Allineamento
 		if (dist > 0.10) {
-			// Punta verso le coordinate
+			// Se siamo lontani, puntiamo alle coordinate
 			desired_angle = std::atan2(dy, dx);
 			
-			// Velocità proporzionale alla distanza
+			// Velocità proporzionale alla distanza (con limite)
 			twist_vx = 0.5 * dist; 
 			if(twist_vx > 0.4) twist_vx = 0.4;
 		} 
-		// SE SIAMO ARRIVATI
 		else {
-			// Punta all'angolo finale
+			// Se siamo arrivati, puntiamo all'angolo finale
 			desired_angle = target_theta;
-			twist_vx = 0.0; 
+			twist_vx = 0.0; // Fermiamo l'avanzamento
 			std::cout << "ARRIVATO - ALLINEAMENTO" << std::endl;
 		}
 
-		// 2. Calcolo errore angolo
-		error_angle = desired_angle - theta_robot;
+		// 4. Calcolo errore angolare
+		error_angle = desired_angle - current_theta;
 
-		// Normalizzazione angolo
+		// Normalizzazione tra -PI e PI
 		while (error_angle > 3.14159) error_angle -= 2 * 3.14159;
 		while (error_angle < -3.14159) error_angle += 2 * 3.14159;
 
-		// Rotazione
-		twist_wz = 1.5 * error_angle;
+		// 5. Imposta velocità angolare
+		twist_wz = 1.5 * error_angle; 
 
-		// Stop totale se finito
+		// STOP TOTALE
 		if (dist < 0.10 && std::abs(error_angle) < 0.05) {
 			twist_wz = 0.0;
 		}
+
+		// Assegnazione variabili
+		twist_msg.linear().x(twist_vx);
+		twist_msg.linear().y(0.0);	
+		twist_msg.angular().z(twist_wz);
 	}
 
-	twist_msg.linear().x(twist_vx);
-	twist_msg.linear().y(0.0);    
-	twist_msg.angular().z(twist_wz);
-	
 	twist_pub.publish(&twist_msg);
+
 	odometryCallback(this);
 }
 
-void VelocityController::skip() {}
-void VelocityController::missed() {}
-void VelocityController::quit() {}
-
-void VelocityController::readKeyboard(int key) {
-
-	if(key==8){
-		std::cout << " : X +\n"; twist_vx += 0.1;
-	} else if(key==2){
-		std::cout << " : X -\n"; twist_vx -= 0.1;
-	} else if(key==4){
-		std::cout << " : Z +\n"; twist_wz += 0.1;
-	} else if(key==6){
-		std::cout << " : Z -\n"; twist_wz -= 0.1;
-	} else if(key==0){
-		std::cout << " : STOP\n";
-		twist_vx = 0.0; twist_wz = 0.0;
-		manual_drive = true;
-	} else if(key==3){
-		// Imposta Target usando i valori correnti dall'odometria per calcolare il relativo
-		double start_x = odo_msg.pose().pose().position().x();
-		double start_y = odo_msg.pose().pose().position().y();
-		double start_theta = odo_msg.pose().pose().orientation().z();
-
-		target_x = start_x + 2.0; 
-		target_y = start_y - 2.0; 
-		target_theta = start_theta - 1.57; 
-
-		std::cout << " : GOTO START (Target: " << target_x << ", " << target_y << ")\n";
-		manual_drive = false; 
-	} 
+void VelocityController::skip() {
+	std::cout << "[VelocityController]::skip()" << std::endl;
+}
+void VelocityController::missed() {
+	std::cout << "[VelocityController]::missed()" << std::endl;
 }
 
-} // namespace components
-} // namespace aurora
+void VelocityController::quit() {
+	std::cout << "Velocity
