@@ -133,8 +133,6 @@ void VelocityController::odometryCallback(VariantActivity* va) {
 	// nav_msgs::msg::dds_::Odometry_ odo_msg; 
 
 	if(activity->odometrySub.takeNextData(&activity->odo_msg, &m_info)) {
-
-		/* Commentato per pulizia output, decommenta se vuoi vedere i numeri scorrere
 		std::cout << "ODOMETRY"<<std::endl<<"(";
 		std::cout<<std::setprecision(6)<< activity->odo_msg.pose().pose().position().x() << ", ";
 		std::cout<<std::setprecision(6)<< activity->odo_msg.pose().pose().position().y() << ", ";
@@ -142,7 +140,7 @@ void VelocityController::odometryCallback(VariantActivity* va) {
 		std::cout<<std::setprecision(6)<< activity->odo_msg.twist().twist().linear().x() << ", ";
 		std::cout<<std::setprecision(6)<< activity->odo_msg.twist().twist().linear().y() << ", ";
 		std::cout<<std::setprecision(6)<< activity->odo_msg.twist().twist().angular().z() << ")" << std::endl;
-		*/
+		
 	}
 
 // ################ USER DEFINED END ####################
@@ -237,4 +235,62 @@ void VelocityController::missed() {
 }
 
 void VelocityController::quit() {
-	std::cout << "Velocity
+	std::cout << "VelocityController::quit()" << std::endl;
+}
+
+
+void VelocityController::readKeyboard(int key) {
+
+	if(key==8){
+		std::cout << " : X +\n";
+		twist_vx += 0.1;
+	} else if(key==2){
+		std::cout << " : X -\n";
+		twist_vx -= 0.1;
+	} else if(key==4){
+		std::cout << " : Z +\n";
+		twist_wz += 0.1;
+	} else if(key==6){
+		std::cout << " : Z -\n";
+		twist_wz -= 0.1;
+	} else if(key==0){
+		std::cout << " : STOP\n";
+		twist_vx = 0.0;
+		twist_vy = 0.0;
+		twist_wz = 0.0;
+		manual_drive = true; // Torna in manuale
+	} else if(key==7){
+		std::cout << " : GOTO (Manuale Disattivato)\n";
+		twist_vx = 0.0;
+		twist_vy = 0.0;
+		twist_wz = 0.0;
+		manual_drive = false;
+	}
+	else if(key==3){
+		// --- NUOVO TASTO 3 ---
+		// Leggiamo posizione attuale da odo_msg
+		double curr_x = odo_msg.pose().pose().position().x();
+		double curr_y = odo_msg.pose().pose().position().y();
+		double curr_th = odo_msg.pose().pose().orientation().z();
+
+		// Impostiamo Target: +2 metri X, -2 metri Y
+		target_x = curr_x + 2.0;
+		target_y = curr_y - 2.0;
+		
+		// Impostiamo Angolo: -90 gradi (orario) rispetto ad ora
+		target_theta = curr_th - 1.57;
+
+		std::cout << " : GOTO START (Target: " << target_x << ", " << target_y << ")\n";
+		
+		twist_vx = 0.0;
+		twist_wz = 0.0;
+		manual_drive = false; // Attiva la logica nel task
+	}
+	else {
+//		std::cout << "(8) X+  (2) X-  (4) Z+  (6) Z-  (0) STOP" << std::endl;
+		return;
+	}
+}
+
+} // namespace components
+} // namespace aurora
