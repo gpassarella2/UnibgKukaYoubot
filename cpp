@@ -165,4 +165,50 @@ void VelocityController::task() {
     geometry_msgs::msg::dds_::Twist_ twist_msg;
     twist_msg.linear().x(twist_vx);
     twist_msg.linear().y(twist_vy); // NECESSARIO PER NON FARE ARCHI
-    twist_msg.angular().
+    twist_msg.angular().z(twist_wz);
+    twist_pub.publish(&twist_msg);
+
+    odometryCallback(this);
+}
+
+void VelocityController::readKeyboard(int key) {
+    if(key==8){ twist_vx += 0.1; std::cout << "X+\n"; }
+    else if(key==2){ twist_vx -= 0.1; std::cout << "X-\n"; }
+    else if(key==4){ twist_wz += 0.1; std::cout << "Z+\n"; }
+    else if(key==6){ twist_wz -= 0.1; std::cout << "Z-\n"; }
+    else if(key==0){ 
+        twist_vx=0; twist_vy=0; twist_wz=0; 
+        manual_drive=true; std::cout << "STOP\n"; 
+    }
+    else if(key==3){
+        std::cout << "\n>>> START: Linea retta verso (11,0) con rotazione 90° <<<\n";
+        
+        // Salva posa iniziale (riferimento per l'interpolazione della rotazione)
+        start_x_s = current_x;
+        start_y_s = current_y;
+        start_th_s = current_theta;
+
+        // Imposta target: X=11, Y=0 (Come da tua richiesta precedente)
+        target_x = 11.0;
+        target_y = 0.0;
+        
+        // Target theta finale non viene usato direttamente nel loop (usiamo l'interpolazione)
+        // ma concettualmente è start + 90°.
+        target_theta = normalizeAngle(start_th_s + (M_PI / 2.0));
+
+        manual_drive = false;
+        goal_reached = false;
+        motion_active = true;
+    }
+}
+
+void VelocityController::init() { std::cout << "Init. Premi '3' per avvio." << std::endl; }
+void VelocityController::reconfigure() {}
+void VelocityController::skip() {}
+void VelocityController::missed() {}
+void VelocityController::quit() {}
+void VelocityController::twistConnectionCallback(VariantActivity* va, std::string port, bool matched, int num_connections) {}
+void VelocityController::roverOdomConnectionCallback(VariantActivity* va, std::string port, bool matched, int num_connections) {}
+
+} // namespace components
+} // namespace aurora
