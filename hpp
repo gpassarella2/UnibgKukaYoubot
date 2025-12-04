@@ -44,17 +44,13 @@
  * You should have received a copy of the GNU Lesser General Public
  * License LGPL and BSD license along with this program.
  *
- ******************************************************************************
- */
+ ******************************************************************************/
 #ifndef AURORA_INPUT_READER_ACTIVITY_H
 #define AURORA_INPUT_READER_ACTIVITY_H
 
 #include <stresa/core/runtime/VActivity.hpp>
-
 #include "stresa/core/msgs/geometry_msgsPubSubTypes.h"
-
 #include "aurora/nav_msgsPubSubTypes.h"
-
 
 using namespace stresa;
 
@@ -63,38 +59,37 @@ namespace components {
 
 class VelocityController : public VActivity {
 public:
-	VelocityController();
-	~VelocityController();
+    VelocityController();
+    ~VelocityController();
 
-	static void twistConnectionCallback(VariantActivity* va, std::string port, bool matched, int num_connections);
-	static void roverOdomConnectionCallback(VariantActivity* va, std::string port, bool matched, int num_connections);
-	static void odometryCallback(VariantActivity* va);
+    static void twistConnectionCallback(VariantActivity* va, std::string port, bool matched, int num_connections);
+    static void roverOdomConnectionCallback(VariantActivity* va, std::string port, bool matched, int num_connections);
+    static void odometryCallback(VariantActivity* va);
 
 protected:
-	void init();
-	void reconfigure();
-	void skip();
-	void missed();
-	void task();
-	void quit();
-
+    void init();
+    void reconfigure();
+    void skip();
+    void missed();
+    void task();
+    void quit();
 
 private:
-	VPublisher<geometry_msgs::msg::dds_::Twist_PubSubType> twist_pub;
+    VPublisher<geometry_msgs::msg::dds_::Twist_PubSubType> twist_pub;
+    VSubscriber<nav_msgs::msg::dds_::Odometry_PubSubType> odometrySub;
 
-	VSubscriber<nav_msgs::msg::dds_::Odometry_PubSubType> odometrySub;
+    double twist_vx, twist_vy, twist_wz;
+    bool manual_drive;
 
-	double twist_vx, twist_vy, twist_wz;
-	bool manual_drive;
+    void readKeyboard(int key);
 
-	void readKeyboard(int key);
-	
-	double target_x, target_y, target_theta;
-// ################ USER DEFINED BEGIN ##################
-// ################ USER DEFINED END ####################
+    double target_x, target_y, target_theta;
+
+    bool goto_mode;
+
 };
 
 } // namespace components
-} // namespace stresa
+} // namespace aurora
 
 #endif
