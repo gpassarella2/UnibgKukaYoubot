@@ -31,16 +31,19 @@ private:
     VPublisher<geometry_msgs::msg::dds_::Twist_PubSubType> twist_pub;
     VSubscriber<nav_msgs::msg::dds_::Odometry_PubSubType> odometrySub;
 
-    // --- Stato Attuale ---
+    // Stato
     double current_x;
     double current_y;
     double current_theta;
 
-    // --- Target ---
+    // Target
     double target_x;
     double target_y;
+    
+    // Angolo da mantenere fisso durante la traslazione
+    double locked_theta; 
 
-    // --- Comandi ---
+    // Comandi
     double twist_vx;
     double twist_vy; 
     double twist_wz;
@@ -49,10 +52,10 @@ private:
     bool goal_reached;
 
     void readKeyboard(int key);
+    double normalizeAngle(double angle);
     double quaternionToYaw(double x, double y, double z, double w);
     
-    // --- FUNZIONE CORRETTA ---
-    // Ora il nome corrisponde a quello nel file .cpp
+    // Funzione Corretta con Heading Lock
     void runTranslationOnly();
 };
 
