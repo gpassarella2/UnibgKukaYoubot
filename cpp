@@ -33,6 +33,11 @@ using namespace stresa;
 namespace aurora {
 namespace components {
 
+// Variabili statiche per memorizzare la posa iniziale per l'interpolazione
+static double start_x_s = 0.0;
+static double start_y_s = 0.0;
+static double start_th_s = 0.0;
+
 int _kbhit() {
     static const int STDIN = 0;
     static bool initialized = false;
@@ -119,12 +124,31 @@ void VelocityController::runAutonomousControl() {
         return;
     }
     
+    // Calcolo distanza totale iniziale
+    double total_dx = target_x - start_x_s;
+    double total_dy = target_y - start_y_s;
+    double total_dist = std::sqrt(total_dx*total_dx + total_dy*total_dy);
+    
+    // Calcolo progresso (0.0 = inizio, 1.0 = fine)
+    double progress = 0.0;
+    if (total_dist > 0.001) {
+        progress = 1.0 - (rho / total_dist);
+    }
+    if (progress < 0.0) progress = 0.0;
+    if (progress > 1.0) progress = 1.0;
+
+    // Interpolazione Angolo: Ruota progressivamente in base alla % di strada fatta
+    double total_rotation = normalizeAngle(target_theta - start_th_s);
+    double desired_current_theta = start_th_s + (total_rotation * progress);
+    
+    double theta_error = normalizeAngle(desired_current_theta - current_theta);
+
     double k_v = 0.5;   
-    double k_w = 1.0; 
+    double k_w = 1.5; // Guadagno rotazione un po' più alto per seguire bene l'interpolazione
 
     double cmd_vx = k_v * (dx * std::cos(current_theta) + dy * std::sin(current_theta));
     double cmd_vy = k_v * (-dx * std::sin(current_theta) + dy * std::cos(current_theta));
-    double cmd_wz = k_w * normalizeAngle(target_theta - current_theta);
+    double cmd_wz = k_w * theta_error;
 
     if (cmd_vx > 0.5) cmd_vx = 0.5; // Max 0.5 m/s
     if (cmd_vx < -0.5) cmd_vx = -0.5;
@@ -132,8 +156,8 @@ void VelocityController::runAutonomousControl() {
     if (cmd_vy > 0.5) cmd_vy = 0.5;
     if (cmd_vy < -0.5) cmd_vy = -0.5;
 
-    if (cmd_wz > 1.0) cmd_wz = 1.0; // Max 1.0 rad/s
-    if (cmd_wz < -1.0) cmd_wz = -1.0;
+    if (cmd_wz > 0.8) cmd_wz = 0.8; 
+    if (cmd_wz < -0.8) cmd_wz = -0.8;
     
     twist_vx = cmd_vx;
     twist_vy = cmd_vy;
@@ -188,21 +212,28 @@ void VelocityController::readKeyboard(int key) {
         twist_wz = 0.0;
         manual_drive = false;
     } else if(key==3){
-        std::cout << "\GOTO TRASL\n";
+        std::cout << "\n>>> GOTO COORDINATA CON ROTAZIONE GRADUALE <<<\n";
         
+        // Salviamo lo stato iniziale per calcolare il progresso
+        start_x_s = current_x;
+        start_y_s = current_y;
+        start_th_s = current_theta;
+
         target_x = -5.0;
         target_y = 11.0;
-        target_theta = 0.0; 
+        
+        // Target angolo: Start + 90 gradi (M_PI / 2.0)
+        target_theta = normalizeAngle(current_theta + (M_PI / 2.0)); 
 
         manual_drive = false;
         goal_reached = false;
 
-        std::cout << "Start Pose: (" << current_x << ", " << current_y << ")\n";
-        std::cout << "Global Target: (" << target_x << ", " << target_y << ")\n";
+        std::cout << "Start: (" << start_x_s << ", " << start_y_s << ")\n";
+        std::cout << "Target: (" << target_x << ", " << target_y << ")\n";
     }
 }
 
-void VelocityController::init() { std::cout << "Init. Premi '3' per arco automatico." << std::endl; }
+void VelocityController::init() { std::cout << "Init. Premi '3' per movimento combinato." << std::endl; }
 void VelocityController::reconfigure() {}
 void VelocityController::skip() {}
 void VelocityController::missed() {}
