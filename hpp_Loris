@@ -31,7 +31,7 @@ private:
     VPublisher<geometry_msgs::msg::dds_::Twist_PubSubType> twist_pub;
     VSubscriber<nav_msgs::msg::dds_::Odometry_PubSubType> odometrySub;
 
-    // --- Stato ---
+    // --- Stato Attuale ---
     double current_x;
     double current_y;
     double current_theta;
@@ -39,24 +39,21 @@ private:
     // --- Target ---
     double target_x;
     double target_y;
-    double target_theta;
 
     // --- Comandi ---
     double twist_vx;
-    double twist_vy; // Fondamentale per muoversi dritto mentre si gira
+    double twist_vy; 
     double twist_wz;
 
     bool manual_drive;
     bool goal_reached;
 
     void readKeyboard(int key);
-    
-    // Funzioni
-    double normalizeAngle(double angle);
     double quaternionToYaw(double x, double y, double z, double w);
     
-    // Logica Omnidirezionale (Va dritto al punto mentre ruota)
-    void runOmniControl();
+    // --- FUNZIONE CORRETTA ---
+    // Ora il nome corrisponde a quello nel file .cpp
+    void runTranslationOnly();
 };
 
 } // namespace components
