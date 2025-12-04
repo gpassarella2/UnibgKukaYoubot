@@ -1,6 +1,6 @@
 /********************************************************************************
  *
- * InputReaderActivity.cpp - RELATIVE INPUT TARGET (BODY FRAME)
+ * InputReaderActivity.cpp - OMNIDIRECTIONAL TARGETING (Absolute Input)
  *
  ******************************************************************************/
 
@@ -40,7 +40,6 @@ int _kbhit() {
     return getchar()-48;
 }
 
-// --- Costruttore ---
 InputReaderActivity::InputReaderActivity() : VActivity() {
     registerPublisher(&twist_pub, "TwistPub", "rt/cmd_vel");
     registerSubscriber(&odometrySub, "OdometrySub", "rt/odom");
@@ -53,7 +52,7 @@ InputReaderActivity::InputReaderActivity() : VActivity() {
 
 InputReaderActivity::~InputReaderActivity() {}
 
-// --- Funzioni Matematiche ---
+// --- Matematica ---
 double InputReaderActivity::normalizeAngle(double angle) {
     while (angle > M_PI) angle -= 2.0 * M_PI;
     while (angle < -M_PI) angle += 2.0 * M_PI;
@@ -66,7 +65,7 @@ double InputReaderActivity::quaternionToYaw(double x, double y, double z, double
     return std::atan2(siny_cosp, cosy_cosp);
 }
 
-// --- Callback Odometria ---
+// --- Odometria ---
 void InputReaderActivity::odometryCallback(VariantActivity* va) {
     InputReaderActivity* activity = (InputReaderActivity*) va;
     SampleInfo m_info;
@@ -85,59 +84,65 @@ void InputReaderActivity::odometryCallback(VariantActivity* va) {
 }
 
 // ============================================================================
-// LOGICA DI CONTROLLO CARTESIANA
+// LOGICA OMNIDIREZIONALE (Move To Point + Rotate)
 // ============================================================================
-void InputReaderActivity::runCartesianControl() {
+void InputReaderActivity::runOmniControl() {
     
-    // 1. Errore Globale (Target Fisso - Posizione Corrente)
+    // 1. Calcolo Errore nel MONDO (World Frame)
+    // Questo è il vettore "linea d'aria" verso il target
     double global_dx = target_x - current_x;
     double global_dy = target_y - current_y;
 
-    // 2. Distanza e Errore Angolare
-    double dist = std::sqrt(global_dx*global_dx + global_dy*global_dy);
+    // Distanza euclidea
+    double distance_error = std::sqrt(global_dx*global_dx + global_dy*global_dy);
+    
+    // Errore Angolare (Voglio arrivare girato di +90 rispetto all'inizio)
     double theta_error = normalizeAngle(target_theta - current_theta);
 
-    // Debug Status (ogni tanto)
-    static int log_cnt = 0;
-    if(log_cnt++ > 100) {
-        std::cout << "Dist: " << dist << " | AngErr: " << theta_error << "\r" << std::flush;
-        log_cnt = 0;
+    // Debug ogni tanto
+    static int c = 0;
+    if(c++ > 100) {
+        std::cout << "Dist: " << distance_error << " | AngErr: " << theta_error << "\r" << std::flush;
+        c=0;
     }
 
-    // --- STOP: Se siamo vicini (10cm) E l'angolo è giusto (5 gradi) ---
-    if (dist < 0.10 && std::abs(theta_error) < 0.1) {
+    // --- STOP CONDITION ---
+    // Mi fermo se sono vicino (10cm) E l'angolo è quasi giusto (0.05 rad ~ 3 gradi)
+    if (distance_error < 0.10 && std::abs(theta_error) < 0.05) {
         twist_vx = 0.0; twist_vy = 0.0; twist_wz = 0.0;
         goal_reached = true;
         manual_drive = true;
-        std::cout << "\n>>> TARGET RAGGIUNTO <<<" << std::endl;
+        std::cout << "\n>>> TARGET RAGGIUNTO E RUOTATO! <<<\n" << std::endl;
         return;
     }
 
-    // 3. Calcolo Velocità Desiderata nel MONDO
-    double k_v = 0.8; // Reattività lineare
-    double k_w = 1.2; // Reattività angolare
+    // 2. Calcolo Velocità Desiderata nel MONDO
+    double k_v = 0.8; // Guadagno Lineare
+    double k_w = 1.0; // Guadagno Angolare
 
     double v_world_x = k_v * global_dx;
     double v_world_y = k_v * global_dy;
     
-    // Saturazione (Max 0.5 m/s)
+    // Saturazione Velocità Lineare
     double v_mag = std::sqrt(v_world_x*v_world_x + v_world_y*v_world_y);
-    if(v_mag > 0.5) {
+    if(v_mag > 0.5) { // Max 0.5 m/s
         double scale = 0.5 / v_mag;
         v_world_x *= scale;
         v_world_y *= scale;
     }
 
-    // 4. TRASFORMAZIONE: Mondo -> Robot (per ruote Mecanum)
-    // Ruotiamo il vettore velocità mondiale nel sistema locale del robot
+    // 3. TRASFORMAZIONE: Mondo -> Robot
+    // Qui sta il trucco: anche se il robot ruota, noi ruotiamo il vettore velocità
+    // nel senso opposto (-theta). Così il robot continua a muoversi sulla linea retta globale
+    // usando una combinazione di Vx e Vy.
+    
     double cos_th = std::cos(current_theta);
     double sin_th = std::sin(current_theta);
 
-    // Vx_robot = proiezione frontale, Vy_robot = proiezione laterale
     twist_vx = v_world_x * cos_th + v_world_y * sin_th;
     twist_vy = -v_world_x * sin_th + v_world_y * cos_th;
     
-    // 5. Rotazione su se stesso (indipendente dalla traslazione)
+    // 4. Controllo Rotazione (Indipendente)
     twist_wz = k_w * theta_error;
 
     // Saturazione Rotazione
@@ -150,12 +155,12 @@ void InputReaderActivity::task() {
     if (key != -1) readKeyboard(key);
 
     if (!manual_drive && !goal_reached) {
-        runCartesianControl();
+        runOmniControl();
     }
 
     geometry_msgs::msg::dds_::Twist_ twist_msg;
     twist_msg.linear().x(twist_vx);
-    twist_msg.linear().y(twist_vy); // Usa Vy per muoversi in omni
+    twist_msg.linear().y(twist_vy); // Vy serve per andare dritto mentre si ruota
     twist_msg.angular().z(twist_wz);
     twist_pub.publish(&twist_msg);
 
@@ -163,62 +168,49 @@ void InputReaderActivity::task() {
 }
 
 // ============================================================================
-// INPUT UTENTE: CALCOLO TARGET RELATIVO
+// INPUT UTENTE (Coordinate Assolute)
 // ============================================================================
 void InputReaderActivity::readKeyboard(int key) {
 
-    // Manuale
     if (key == 8) { twist_vx += 0.1; manual_drive = true; }
     else if (key == 2) { twist_vx -= 0.1; manual_drive = true; }
     else if (key == 4) { twist_wz += 0.1; manual_drive = true; }
     else if (key == 6) { twist_wz -= 0.1; manual_drive = true; }
     else if (key == 0) { 
-        twist_vx = 0; twist_vy = 0; twist_wz = 0; 
+        twist_vx = 0.0; twist_vy = 0.0; twist_wz = 0.0; 
         manual_drive = true; 
         std::cout << "STOP" << std::endl;
     }
     
-    // --- TASTO 3: INPUT RELATIVO AL ROBOT ---
+    // --- TASTO 3: INPUT COORDINATE MONDO + CALCOLO ROTAZIONE ---
     else if (key == 3) {
-        // Ferma tutto
+        // Reset
         twist_vx = 0; twist_vy = 0; twist_wz = 0;
         manual_drive = false;
         goal_reached = false;
 
         std::cout << "\n----------------------------------------" << std::endl;
-        std::cout << "CONFIGURAZIONE PERCORSO (Input Relativo)" << std::endl;
-        std::cout << "Posizione Attuale WBT: " << current_x << ", " << current_y << std::endl;
+        std::cout << "ATTUALE (Mondo): X=" << current_x << " Y=" << current_y << std::endl;
         std::cout << "----------------------------------------" << std::endl;
         
-        double rel_x, rel_y;
-        std::cout << "Metri in AVANTI (X locale): ";
-        std::cin >> rel_x;
+        // 1. Chiediamo le coordinate del punto finale
+        std::cout << "Inserisci X TARGET (Mondo): ";
+        std::cin >> target_x;
         
-        std::cout << "Metri di LATO (Y locale, +sx, -dx): ";
-        std::cin >> rel_y;
+        std::cout << "Inserisci Y TARGET (Mondo): ";
+        std::cin >> target_y;
 
-        // --- CALCOLO DEL TARGET GLOBALE ---
-        // 1. Prendo lo spostamento locale (es. 2m avanti, 0m lato)
-        // 2. Lo ruoto in base a come è girato il robot ORA (current_theta)
-        // 3. Lo sommo alla posizione attuale del robot
-        
-        double cos_th = std::cos(current_theta);
-        double sin_th = std::sin(current_theta);
-
-        // Rotazione Vettore + Traslazione
-        target_x = current_x + (rel_x * cos_th - rel_y * sin_th);
-        target_y = current_y + (rel_x * sin_th + rel_y * cos_th);
-
-        // L'angolo finale è fisso: +90 gradi rispetto a ORA
+        // 2. Calcoliamo l'angolo finale desiderato
+        // "Arrivare traslato di 90 gradi rispetto alla posizione di origine"
+        // Significa: Angolo Finale = Angolo Iniziale + 90
         target_theta = normalizeAngle(current_theta + (M_PI / 2.0));
 
-        std::cout << "--> Target Globale Calcolato: (" << target_x << ", " << target_y << ")" << std::endl;
-        std::cout << "--> Il robot traslera' ruotando..." << std::endl;
+        std::cout << "--> Vado a (" << target_x << ", " << target_y << ") ruotando a " << target_theta << " rad." << std::endl;
     }
 }
 
 void InputReaderActivity::init() {
-    std::cout << "Ready. Press '3' to input relative path." << std::endl;
+    std::cout << "Ready. Press '3' to input coordinates." << std::endl;
 }
 void InputReaderActivity::reconfigure() {}
 void InputReaderActivity::skip() {}
