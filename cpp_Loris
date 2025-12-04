@@ -1,6 +1,6 @@
 /********************************************************************************
  *
- * InputReaderActivity.cpp - OMNIDIRECTIONAL MOVE + ROTATE + BRAKING
+ * InputReaderActivity.cpp - CORRETTO
  *
  ******************************************************************************/
 
@@ -84,66 +84,68 @@ void InputReaderActivity::odometryCallback(VariantActivity* va) {
 }
 
 // ============================================================================
-// LOGICA: MUOVITI AL PUNTO E RUOTA (CON FRENATA)
+// LOGICA DI CONTROLLO OMNIDIREZIONALE (Corretta)
 // ============================================================================
 void InputReaderActivity::runOmniMoveAndRotate() {
     
-    // 1. Errore nel Mondo
+    // 1. Calcolo Errori Globali
     double err_x_world = target_x - current_x;
     double err_y_world = target_y - current_y;
     double dist = std::sqrt(err_x_world*err_x_world + err_y_world*err_y_world);
     
     double err_theta = normalizeAngle(target_theta - current_theta);
 
-    // Debug
+    // Debug (Stampa ogni tanto)
     static int c = 0;
     if(c++ > 50) {
         std::cout << "Dist: " << dist << " | AngErr: " << err_theta << "\r" << std::flush;
         c=0;
     }
 
-    // --- STOP CON TOLLERANZA ---
-    // Se siamo sotto i 5 cm E l'angolo è a posto (circa 3 gradi), STOP.
-    if (dist < 0.05 && std::abs(err_theta) < 0.05) {
-        twist_vx = 0.0; twist_vy = 0.0; twist_wz = 0.0;
+    // --- STOP CONDIZIONATO (Tolleranza: 10cm dist, 0.05rad angolo) ---
+    if (dist < 0.10 && std::abs(err_theta) < 0.05) {
+        twist_vx = 0.0; 
+        twist_vy = 0.0; 
+        twist_wz = 0.0;
+        
         goal_reached = true;
         manual_drive = true;
-        std::cout << "\n>>> ARRIVATO, RUOTATO E FERMO! <<<\n" << std::endl;
+        std::cout << "\n\n>>> ARRIVATO AL PUNTO E RUOTATO! <<<\n" << std::endl;
         return;
     }
 
-    // 2. Calcolo Velocità Proporzionale (Frenata)
-    // Più ci avviciniamo, più questi valori diventano piccoli
+    // 2. Calcolo Velocità Proporzionale nel Mondo
     double Kp_lin = 1.0;  // Guadagno lineare
     double Kp_ang = 1.5;  // Guadagno angolare
 
-    double v_x_world = Kp_lin * err_x_world;
-    double v_y_world = Kp_lin * err_y_world;
-    double w_z_req   = Kp_ang * err_theta;
+    // Variabili dichiarate correttamente qui
+    double v_world_x = Kp_lin * err_x_world;
+    double v_world_y = Kp_lin * err_y_world;
+    
+    double w_z_req = Kp_ang * err_theta;
 
-    // 3. Saturazione (Non superare velocità massima)
-    double v_mag = std::sqrt(v_x_world*v_x_world + v_y_world*v_y_world);
-    double max_v = 0.5; // Max 0.5 m/s
+    // 3. Saturazione Velocità Lineare (Max 0.5 m/s)
+    double v_mag = std::sqrt(v_world_x*v_world_x + v_world_y*v_world_y);
+    double max_v = 0.5;
 
     if(v_mag > max_v) {
         double scale = max_v / v_mag;
-        v_x_world *= scale;
-        v_y_world *= scale;
+        v_world_x *= scale;
+        v_world_y *= scale;
     }
     
-    // Saturazione rotazione
+    // Saturazione Rotazione (Max 0.8 rad/s)
     if (w_z_req > 0.8) w_z_req = 0.8;
     if (w_z_req < -0.8) w_z_req = -0.8;
 
-    // 4. TRASFORMAZIONE: Mondo -> Robot
-    // Ruotiamo il vettore velocità di -current_theta per darlo alle ruote Mecanum
+    // 4. TRASFORMAZIONE: Mondo -> Robot (Per ruote Mecanum)
+    // Ruotiamo il vettore velocità di -theta per adattarlo al robot
     double cos_th = std::cos(current_theta);
     double sin_th = std::sin(current_theta);
 
-    // Vx del robot = componente avanti
-    // Vy del robot = componente laterale
-    twist_vx = v_x_world * cos_th + v_y_world * sin_th;
-    twist_vy = -v_x_world * sin_th + v_world_y * cos_th;
+    // Assegnazione velocità robot usando le variabili corrette
+    twist_vx = v_world_x * cos_th + v_world_y * sin_th;
+    twist_vy = -v_world_x * sin_th + v_world_y * cos_th;
     twist_wz = w_z_req;
 }
 
@@ -165,7 +167,7 @@ void InputReaderActivity::task() {
 }
 
 // ============================================================================
-// INPUT UTENTE
+// INPUT
 // ============================================================================
 void InputReaderActivity::readKeyboard(int key) {
 
@@ -180,14 +182,14 @@ void InputReaderActivity::readKeyboard(int key) {
         std::cout << "STOP" << std::endl;
     }
     
-    // --- TASTO 3: INPUT COMPLETO ---
+    // --- TASTO 3: INPUT COORDINATE MONDO ---
     else if (key == 3) {
-        // Stop immediato prima di chiedere input
+        // Reset
         twist_vx = 0; twist_vy = 0; twist_wz = 0;
         manual_drive = false;
         goal_reached = false;
 
-        std::cout << "\n--- CONFIGURAZIONE PERCORSO ---" << std::endl;
+        std::cout << "\n----------------------------------------" << std::endl;
         std::cout << "POSIZIONE ATTUALE: X=" << current_x << " Y=" << current_y << " Th=" << current_theta << std::endl;
         
         std::cout << "Inserisci X TARGET (Mondo): ";
@@ -196,16 +198,16 @@ void InputReaderActivity::readKeyboard(int key) {
         std::cout << "Inserisci Y TARGET (Mondo): ";
         std::cin >> target_y;
 
-        // Calcoliamo il target di rotazione: +90 gradi rispetto a ora
-        // Il robot andrà dritto verso X,Y ma arriverà lì girato di 90 gradi
+        // Calcolo angolo finale: +90 gradi rispetto ad ADESSO
+        // Il robot andrà dritto al punto X,Y ma arriverà girato di 90 gradi.
         target_theta = normalizeAngle(current_theta + (M_PI / 2.0));
 
-        std::cout << "--> Partenza verso (" << target_x << ", " << target_y << ") con rotazione simultanea..." << std::endl;
+        std::cout << "--> Vado a (" << target_x << ", " << target_y << ") ruotando..." << std::endl;
     }
 }
 
 void InputReaderActivity::init() {
-    std::cout << "Pronto. Premi '3' per muoverti." << std::endl;
+    std::cout << "Pronto. Premi '3' per input." << std::endl;
 }
 void InputReaderActivity::reconfigure() {}
 void InputReaderActivity::skip() {}
