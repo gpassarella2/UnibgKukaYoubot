@@ -1,21 +1,6 @@
 /********************************************************************************
  *
- * VelocityController
- *
- * Copyright (c) 2019
- * All rights reserved.
- *
- * Davide Brugali, Università degli Studi di Bergamo
- *
- * -------------------------------------------------------------------------------
- * File: VelocityController.cpp
- * Created: May 5, 2019
- * Author: <A HREF="mailto:brugali@unibg.it">Davide Brugali</A>
- * -------------------------------------------------------------------------------
- *
- * This software is published under a dual-license: GNU Lesser General Public
- * License LGPL 2.1 and BSD license. The dual-license implies that users of this
- * code may choose which terms they prefer.
+ * VelocityController.cpp
  *
  ******************************************************************************
  */
@@ -33,10 +18,11 @@ using namespace stresa;
 namespace aurora {
 namespace components {
 
-// Variabili statiche per memorizzare la posa iniziale per l'interpolazione
+// Variabili per gestire la logica di movimento
 static double start_x_s = 0.0;
 static double start_y_s = 0.0;
 static double start_th_s = 0.0;
+static bool executing_motion = false;
 
 int _kbhit() {
     static const int STDIN = 0;
@@ -52,7 +38,7 @@ int _kbhit() {
     int bytesWaiting;
     ioctl(STDIN, FIONREAD, &bytesWaiting);
     if (bytesWaiting == 0) return -1;
-    return getchar() - 48; // Converte ASCII in intero
+    return getchar() - 48; 
 }
 
 VelocityController::VelocityController() : VActivity() {
@@ -63,7 +49,6 @@ VelocityController::VelocityController() : VActivity() {
     twist_vy = 0.0;
     twist_wz = 0.0;
 
-    // Stato Iniziale
     current_x = 0.0;
     current_y = 0.0;
     current_theta = 0.0;
@@ -94,7 +79,6 @@ void VelocityController::odometryCallback(VariantActivity* va) {
     nav_msgs::msg::dds_::Odometry_ odo_msg;
 
     if(activity->odometrySub.takeNextData(&odo_msg, &m_info)) {
-        // 1. Aggiorna posizione X, Y globali
         activity->current_x = odo_msg.pose().pose().position().x();
         activity->current_y = odo_msg.pose().pose().position().y();
         
@@ -109,54 +93,59 @@ void VelocityController::odometryCallback(VariantActivity* va) {
 
 void VelocityController::runAutonomousControl() {
     
-    double dx = target_x - current_x;
-    double dy = target_y - current_y;
+    // Distanza globale dal target
+    double dx_global = target_x - current_x;
+    double dy_global = target_y - current_y;
+    double rho = std::sqrt(dx_global*dx_global + dy_global*dy_global);
 
-    double rho = std::sqrt(dx*dx + dy*dy);
-
+    // STOP Condition
     if (rho < 0.1) {
         twist_vx = 0.0;
         twist_vy = 0.0;
         twist_wz = 0.0;
         goal_reached = true;
         manual_drive = true;
-        std::cout << ">>> TARGET RAGGIUNTO! Torno in manuale. <<<" << std::endl;
+        executing_motion = false;
+        std::cout << ">>> ARRIVATI A (-5, 11)! <<<" << std::endl;
         return;
     }
     
-    // Calcolo distanza totale iniziale
-    double total_dx = target_x - start_x_s;
-    double total_dy = target_y - start_y_s;
-    double total_dist = std::sqrt(total_dx*total_dx + total_dy*total_dy);
+    // --- 1. GESTIONE TRASLAZIONE (Straight Line) ---
+    // Per non fare un arco, calcoliamo il vettore nel mondo e lo ruotiamo
+    // nel frame del robot. Il robot scivolerà dritto indipendentemente da come gira.
     
-    // Calcolo progresso (0.0 = inizio, 1.0 = fine)
-    double progress = 0.0;
-    if (total_dist > 0.001) {
-        progress = 1.0 - (rho / total_dist);
-    }
-    if (progress < 0.0) progress = 0.0;
-    if (progress > 1.0) progress = 1.0;
-
-    // Interpolazione Angolo: Ruota progressivamente in base alla % di strada fatta
-    double total_rotation = normalizeAngle(target_theta - start_th_s);
-    double desired_current_theta = start_th_s + (total_rotation * progress);
+    double k_v = 0.6; // Velocità lineare
     
-    double theta_error = normalizeAngle(desired_current_theta - current_theta);
+    // Proiezione vettoriale perfetta:
+    // Vx e Vy sono calcolati istante per istante usando l'angolo CORRENTE del robot.
+    // Questo compensa esattamente la rotazione del corpo.
+    double cmd_vx = k_v * (dx_global * std::cos(current_theta) + dy_global * std::sin(current_theta));
+    double cmd_vy = k_v * (-dx_global * std::sin(current_theta) + dy_global * std::cos(current_theta));
 
-    double k_v = 0.5;   
-    double k_w = 1.5; // Guadagno rotazione un po' più alto per seguire bene l'interpolazione
+    // Saturazione lineare
+    if (cmd_vx > 0.6) cmd_vx = 0.6;
+    if (cmd_vx < -0.6) cmd_vx = -0.6;
+    if (cmd_vy > 0.6) cmd_vy = 0.6;
+    if (cmd_vy < -0.6) cmd_vy = -0.6;
 
-    double cmd_vx = k_v * (dx * std::cos(current_theta) + dy * std::sin(current_theta));
-    double cmd_vy = k_v * (-dx * std::sin(current_theta) + dy * std::cos(current_theta));
-    double cmd_wz = k_w * theta_error;
 
-    if (cmd_vx > 0.5) cmd_vx = 0.5; // Max 0.5 m/s
-    if (cmd_vx < -0.5) cmd_vx = -0.5;
+    // --- 2. GESTIONE ROTAZIONE (Su se stesso) ---
+    // Calcoliamo la percentuale di percorso fatto per interpolare la rotazione
+    double total_dist = std::sqrt(std::pow(target_x - start_x_s, 2) + std::pow(target_y - start_y_s, 2));
+    double progress = 1.0 - (rho / total_dist); 
+    if(progress < 0) progress = 0; if(progress > 1) progress = 1;
 
-    if (cmd_vy > 0.5) cmd_vy = 0.5;
-    if (cmd_vy < -0.5) cmd_vy = -0.5;
+    // Angolo desiderato ORA: parte da StartTheta e va verso TargetTheta linearmente
+    // "Rotazione su se stesso" = rotazione attorno all'asse Z del robot (wz)
+    double target_rotation_amount = M_PI / 2.0; // 90 gradi
+    double desired_theta_now = start_th_s + (target_rotation_amount * progress);
+    
+    double theta_err = normalizeAngle(desired_theta_now - current_theta);
+    double k_w = 2.0; // Alto guadagno per tenere l'angolo "incollato" all'interpolazione
+    double cmd_wz = k_w * theta_err;
 
-    if (cmd_wz > 0.8) cmd_wz = 0.8; 
+    // Saturazione angolare
+    if (cmd_wz > 0.8) cmd_wz = 0.8;
     if (cmd_wz < -0.8) cmd_wz = -0.8;
     
     twist_vx = cmd_vx;
@@ -186,35 +175,26 @@ void VelocityController::task() {
 
 void VelocityController::readKeyboard(int key) {
 
-    // Tasti Manuali
     if(key==8){
-        std::cout << " : X +\n";
-        twist_vx += 0.1;
+        std::cout << " : X +\n"; twist_vx += 0.1;
     } else if(key==2){
-        std::cout << " : X -\n";
-        twist_vx -= 0.1;
+        std::cout << " : X -\n"; twist_vx -= 0.1;
     } else if(key==4){
-        std::cout << " : Z +\n";
-        twist_wz += 0.1;
+        std::cout << " : Z +\n"; twist_wz += 0.1;
     } else if(key==6){
-        std::cout << " : Z -\n";
-        twist_wz -= 0.1;
+        std::cout << " : Z -\n"; twist_wz -= 0.1;
     } else if(key==0){
         std::cout << " : STOP\n";
-        twist_vx = 0.0;
-        twist_vy = 0.0;
-        twist_wz = 0.0;
+        twist_vx = 0.0; twist_vy = 0.0; twist_wz = 0.0;
         manual_drive = true;
     } else if(key==7){
         std::cout << " : GOTO\n";
-        twist_vx = 0.0;
-        twist_vy = 0.0;
-        twist_wz = 0.0;
+        twist_vx = 0.0; twist_vy = 0.0; twist_wz = 0.0;
         manual_drive = false;
     } else if(key==3){
-        std::cout << "\n>>> GOTO COORDINATA CON ROTAZIONE GRADUALE <<<\n";
+        std::cout << "\n>>> TRASLAZIONE RETTILINEA + SPIN SU SE STESSO <<<\n";
         
-        // Salviamo lo stato iniziale per calcolare il progresso
+        // Salvataggio start point per interpolazione corretta
         start_x_s = current_x;
         start_y_s = current_y;
         start_th_s = current_theta;
@@ -222,18 +202,19 @@ void VelocityController::readKeyboard(int key) {
         target_x = -5.0;
         target_y = 11.0;
         
-        // Target angolo: Start + 90 gradi (M_PI / 2.0)
-        target_theta = normalizeAngle(current_theta + (M_PI / 2.0)); 
+        // Target finale = Start + 90 gradi
+        target_theta = normalizeAngle(start_th_s + (M_PI / 2.0)); 
 
         manual_drive = false;
         goal_reached = false;
+        executing_motion = true;
 
         std::cout << "Start: (" << start_x_s << ", " << start_y_s << ")\n";
         std::cout << "Target: (" << target_x << ", " << target_y << ")\n";
     }
 }
 
-void VelocityController::init() { std::cout << "Init. Premi '3' per movimento combinato." << std::endl; }
+void VelocityController::init() { std::cout << "Init. Premi '3' per movimento." << std::endl; }
 void VelocityController::reconfigure() {}
 void VelocityController::skip() {}
 void VelocityController::missed() {}
