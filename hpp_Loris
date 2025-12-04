@@ -1,9 +1,20 @@
+/********************************************************************************
+ *
+ * InputReaderActivity (Header)
+ *
+ * Copyright (c) 2019
+ * All rights reserved.
+ *
+ * Davide Brugali, Università degli Studi di Bergamo
+ *
+ ******************************************************************************/
+
 #ifndef AURORA_INPUT_READER_ACTIVITY_H
 #define AURORA_INPUT_READER_ACTIVITY_H
 
 #include <stresa/core/runtime/VActivity.hpp>
 
-// Include dei messaggi ROS 2 / DDS
+// Include dei messaggi DDS/ROS2
 #include "stresa/core/msgs/geometry_msgsPubSubTypes.h"
 #include "aurora/nav_msgsPubSubTypes.h"
 
@@ -17,13 +28,15 @@ public:
     InputReaderActivity();
     ~InputReaderActivity();
 
-    // Callbacks statiche per la gestione delle connessioni e ricezione dati
+    // Callbacks statiche per la gestione della connessione
     static void twistConnectionCallback(VariantActivity* va, std::string port, bool matched, int num_connections);
     static void roverOdomConnectionCallback(VariantActivity* va, std::string port, bool matched, int num_connections);
+    
+    // Callback per la ricezione dell'odometria
     static void odometryCallback(VariantActivity* va);
 
 protected:
-    // Ciclo di vita dell'attività Stresa
+    // Metodi del ciclo di vita del componente Stresa
     void init();
     void reconfigure();
     void skip();
@@ -32,38 +45,38 @@ protected:
     void quit();
 
 private:
-    // --- Comunicazione ---
+    // --- Publishers & Subscribers ---
     VPublisher<geometry_msgs::msg::dds_::Twist_PubSubType> twist_pub;
     VSubscriber<nav_msgs::msg::dds_::Odometry_PubSubType> odometrySub;
 
-    // --- Variabili di Stato del Robot (Aggiornate da Odometria) ---
+    // --- Stato Attuale del Robot ---
     double current_x;
     double current_y;
     double current_theta;
 
-    // --- Variabili del Target (Dove vogliamo arrivare) ---
+    // --- Target da Raggiungere ---
     double target_x;
     double target_y;
     double target_theta;
 
-    // --- Variabili di Controllo (Comandi) ---
+    // --- Variabili di Comando (Velocità) ---
     double twist_vx;
-    double twist_vy; // Usato poco per diff drive, ma utile se hai omni
+    double twist_vy; // Necessario per il movimento laterale (Mecanum)
     double twist_wz;
 
-    // --- Flag di Logica ---
-    bool manual_drive; // true = guida da tastiera, false = guida autonoma
-    bool goal_reached; // true = arrivato al target
+    // --- Flag di Stato ---
+    bool manual_drive; // Se true, guida l'utente. Se false, guida il controllo automatico.
+    bool goal_reached; // Se true, il robot si ferma.
 
-    // --- Funzioni Helper Private ---
+    // --- Metodi Privati ---
     void readKeyboard(int key);
     
-    // Funzioni matematiche per il controllo
+    // Funzioni matematiche di supporto
     double normalizeAngle(double angle);
     double quaternionToYaw(double x, double y, double z, double w);
     
-    // Logica di controllo Rho-Alpha-Beta
-    void runAutonomousControl();
+    // Logica di controllo per movimento omnidirezionale
+    void runCartesianControl();
 };
 
 } // namespace components
