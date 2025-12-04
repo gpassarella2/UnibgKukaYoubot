@@ -1,20 +1,7 @@
-/********************************************************************************
- *
- * InputReaderActivity (Header)
- *
- * Copyright (c) 2019
- * All rights reserved.
- *
- * Davide Brugali, Università degli Studi di Bergamo
- *
- ******************************************************************************/
-
 #ifndef AURORA_INPUT_READER_ACTIVITY_H
 #define AURORA_INPUT_READER_ACTIVITY_H
 
 #include <stresa/core/runtime/VActivity.hpp>
-
-// Include dei messaggi DDS/ROS2
 #include "stresa/core/msgs/geometry_msgsPubSubTypes.h"
 #include "aurora/nav_msgsPubSubTypes.h"
 
@@ -28,15 +15,11 @@ public:
     InputReaderActivity();
     ~InputReaderActivity();
 
-    // Callbacks statiche per la gestione della connessione
     static void twistConnectionCallback(VariantActivity* va, std::string port, bool matched, int num_connections);
     static void roverOdomConnectionCallback(VariantActivity* va, std::string port, bool matched, int num_connections);
-    
-    // Callback per la ricezione dell'odometria
     static void odometryCallback(VariantActivity* va);
 
 protected:
-    // Metodi del ciclo di vita del componente Stresa
     void init();
     void reconfigure();
     void skip();
@@ -45,38 +28,35 @@ protected:
     void quit();
 
 private:
-    // --- Publishers & Subscribers ---
     VPublisher<geometry_msgs::msg::dds_::Twist_PubSubType> twist_pub;
     VSubscriber<nav_msgs::msg::dds_::Odometry_PubSubType> odometrySub;
 
-    // --- Stato Attuale del Robot ---
+    // --- Stato ---
     double current_x;
     double current_y;
     double current_theta;
 
-    // --- Target da Raggiungere ---
+    // --- Target ---
     double target_x;
     double target_y;
     double target_theta;
 
-    // --- Variabili di Comando (Velocità) ---
+    // --- Comandi ---
     double twist_vx;
-    double twist_vy; // Necessario per il movimento laterale (Mecanum)
+    double twist_vy; // Fondamentale per muoversi dritto mentre si gira
     double twist_wz;
 
-    // --- Flag di Stato ---
-    bool manual_drive; // Se true, guida l'utente. Se false, guida il controllo automatico.
-    bool goal_reached; // Se true, il robot si ferma.
+    bool manual_drive;
+    bool goal_reached;
 
-    // --- Metodi Privati ---
     void readKeyboard(int key);
     
-    // Funzioni matematiche di supporto
+    // Funzioni
     double normalizeAngle(double angle);
     double quaternionToYaw(double x, double y, double z, double w);
     
-    // Logica di controllo per movimento omnidirezionale
-    void runCartesianControl();
+    // Logica Omnidirezionale (Va dritto al punto mentre ruota)
+    void runOmniControl();
 };
 
 } // namespace components
