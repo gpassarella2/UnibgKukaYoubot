@@ -1,6 +1,6 @@
 /********************************************************************************
  *
- * InputReaderActivity.cpp - PURE TRANSLATION (NO ROTATION)
+ * InputReaderActivity.cpp - TRANSLATION WITH HEADING LOCK
  *
  ******************************************************************************/
 
@@ -48,9 +48,17 @@ InputReaderActivity::InputReaderActivity() : VActivity() {
     current_x = 0.0; current_y = 0.0; current_theta = 0.0;
     manual_drive = true;
     goal_reached = true;
+    locked_theta = 0.0;
 }
 
 InputReaderActivity::~InputReaderActivity() {}
+
+// --- Matematica ---
+double InputReaderActivity::normalizeAngle(double angle) {
+    while (angle > M_PI) angle -= 2.0 * M_PI;
+    while (angle < -M_PI) angle += 2.0 * M_PI;
+    return angle;
+}
 
 double InputReaderActivity::quaternionToYaw(double x, double y, double z, double w) {
     double siny_cosp = 2.0 * (w * z + x * y);
@@ -77,40 +85,37 @@ void InputReaderActivity::odometryCallback(VariantActivity* va) {
 }
 
 // ============================================================================
-// LOGICA DI CONTROLLO: SOLO TRASLAZIONE
+// LOGICA: TRASLAZIONE CON CORREZIONE ANGOLARE (Heading Lock)
 // ============================================================================
 void InputReaderActivity::runTranslationOnly() {
     
-    // 1. Errore nel MONDO GLOBALE
+    // 1. Errore Posizione Globale
     double global_dx = target_x - current_x;
     double global_dy = target_y - current_y;
-
     double dist = std::sqrt(global_dx*global_dx + global_dy*global_dy);
 
-    // Debug ogni tanto
+    // Debug
     static int c = 0;
     if(c++ > 100) {
-        std::cout << "Distance to Target: " << dist << " m\r" << std::flush;
+        std::cout << "Dist: " << dist << " | Goal: " << target_x << "," << target_y << "\r" << std::flush;
         c=0;
     }
 
-    // --- STOP CONDITION ---
-    if (dist < 0.05) { // 5 cm tolleranza
-        twist_vx = 0.0; 
-        twist_vy = 0.0; 
-        twist_wz = 0.0;
+    // --- STOP ---
+    if (dist < 0.05) { // 5 cm
+        twist_vx = 0.0; twist_vy = 0.0; twist_wz = 0.0;
         goal_reached = true;
         manual_drive = true;
-        std::cout << "\n>>> ARRIVATO AL PUNTO! <<<" << std::endl;
+        std::cout << "\n>>> ARRIVATO! <<<\n" << std::endl;
         return;
     }
 
-    // 2. Calcolo Velocità nel MONDO
-    double kp = 1.0; // Guadagno proporzionale
+    // 2. Velocità Globale
+    double kp = 0.8;
     double v_world_x = kp * global_dx;
     double v_world_y = kp * global_dy;
-    
-    // Saturazione velocità (Max 0.5 m/s)
+
+    // Saturazione Lineare
     double v_mag = std::sqrt(v_world_x*v_world_x + v_world_y*v_world_y);
     if(v_mag > 0.5) {
         double scale = 0.5 / v_mag;
@@ -118,17 +123,24 @@ void InputReaderActivity::runTranslationOnly() {
         v_world_y *= scale;
     }
 
-    // 3. TRASFORMAZIONE: Mondo -> Robot Locale
-    // Dobbiamo capire come muovere le ruote dato che il robot potrebbe essere girato
+    // 3. TRASFORMAZIONE: Mondo -> Robot
     double cos_th = std::cos(current_theta);
     double sin_th = std::sin(current_theta);
 
-    // Proiezione velocità
     twist_vx = v_world_x * cos_th + v_world_y * sin_th;
     twist_vy = -v_world_x * sin_th + v_world_y * cos_th;
     
-    // 4. ROTAZIONE BLOCCATA
-    twist_wz = 0.0;
+    // 4. CORREZIONE ANGOLARE (HEADING LOCK)
+    // Invece di mettere Wz a 0, calcoliamo l'errore rispetto all'angolo INIZIALE
+    double angle_error = normalizeAngle(locked_theta - current_theta);
+    
+    // P-Controller per tenerlo dritto
+    double kp_angle = 2.0; 
+    twist_wz = kp_angle * angle_error;
+
+    // Saturazione Angolare
+    if (twist_wz > 0.5) twist_wz = 0.5;
+    if (twist_wz < -0.5) twist_wz = -0.5;
 }
 
 void InputReaderActivity::task() {
@@ -159,20 +171,25 @@ void InputReaderActivity::readKeyboard(int key) {
     else if (key == 4) { twist_wz += 0.1; manual_drive = true; }
     else if (key == 6) { twist_wz -= 0.1; manual_drive = true; }
     else if (key == 0) { 
-        twist_vx = 0.0; twist_vy = 0.0; twist_wz = 0.0; 
+        twist_vx = 0; twist_vy = 0; twist_wz = 0; 
         manual_drive = true; 
         std::cout << "STOP" << std::endl;
     }
     
-    // --- TASTO 3: VAI AL PUNTO (Solo Traslazione) ---
+    // --- TASTO 3: INPUT COORDINATE (Con Heading Lock) ---
     else if (key == 3) {
         // Reset
         twist_vx = 0; twist_vy = 0; twist_wz = 0;
         manual_drive = false;
         goal_reached = false;
+        
+        // BLOCCO L'ANGOLO ATTUALE
+        // Il robot cercherà di mantenere questo angolo per tutto il viaggio
+        locked_theta = current_theta;
 
         std::cout << "\n----------------------------------------" << std::endl;
         std::cout << "POSIZIONE ATTUALE: X=" << current_x << " Y=" << current_y << std::endl;
+        std::cout << "ANGOLO BLOCCATO: " << locked_theta << std::endl;
         std::cout << "----------------------------------------" << std::endl;
         
         std::cout << "Inserisci X TARGET (Mondo): ";
@@ -181,12 +198,12 @@ void InputReaderActivity::readKeyboard(int key) {
         std::cout << "Inserisci Y TARGET (Mondo): ";
         std::cin >> target_y;
 
-        std::cout << "--> Vado a (" << target_x << ", " << target_y << ") SENZA RUOTARE." << std::endl;
+        std::cout << "--> Traslazione verso (" << target_x << ", " << target_y << ")..." << std::endl;
     }
 }
 
 void InputReaderActivity::init() {
-    std::cout << "Pronto. Premi '3' per input coordinate." << std::endl;
+    std::cout << "Pronto. Premi '3' per traslazione precisa." << std::endl;
 }
 void InputReaderActivity::reconfigure() {}
 void InputReaderActivity::skip() {}
