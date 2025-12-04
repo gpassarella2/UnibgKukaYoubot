@@ -1,13 +1,8 @@
 /********************************************************************************
- *
  * VelocityController.cpp
- *
- ******************************************************************************
- */
+ ******************************************************************************/
 #include "VelocityController.hpp"
 #include <iostream>
-#include <sstream>
-
 #include <cmath> 
 #include <stdio.h>
 #include <sys/select.h>
@@ -18,11 +13,11 @@ using namespace stresa;
 namespace aurora {
 namespace components {
 
-// Variabili per gestire la logica di movimento
+// Variabili statiche per memorizzare lo stato iniziale del movimento
 static double start_x_s = 0.0;
 static double start_y_s = 0.0;
 static double start_th_s = 0.0;
-static bool executing_motion = false;
+static bool motion_active = false;
 
 int _kbhit() {
     static const int STDIN = 0;
@@ -48,17 +43,14 @@ VelocityController::VelocityController() : VActivity() {
     twist_vx = 0.0;
     twist_vy = 0.0;
     twist_wz = 0.0;
-
     current_x = 0.0;
     current_y = 0.0;
     current_theta = 0.0;
-
     manual_drive = true;
     goal_reached = true;
 }
 
 VelocityController::~VelocityController() {}
-
 
 double VelocityController::normalizeAngle(double angle) {
     while (angle > M_PI) angle -= 2.0 * M_PI;
@@ -71,7 +63,6 @@ double VelocityController::quaternionToYaw(double x, double y, double z, double 
     double cosy_cosp = 1.0 - 2.0 * (y * y + z * z);
     return std::atan2(siny_cosp, cosy_cosp);
 }
-
 
 void VelocityController::odometryCallback(VariantActivity* va) {
     VelocityController* activity = (VelocityController*) va;
@@ -92,61 +83,60 @@ void VelocityController::odometryCallback(VariantActivity* va) {
 }
 
 void VelocityController::runAutonomousControl() {
-    
-    // Distanza globale dal target
+    // 1. Calcolo vettore distanza GLOBALE (Mondo)
     double dx_global = target_x - current_x;
     double dy_global = target_y - current_y;
-    double rho = std::sqrt(dx_global*dx_global + dy_global*dy_global);
+    double dist_remaining = std::sqrt(dx_global*dx_global + dy_global*dy_global);
 
-    // STOP Condition
-    if (rho < 0.1) {
+    // Stop se arrivati (tolleranza 10 cm)
+    if (dist_remaining < 0.10) {
         twist_vx = 0.0;
         twist_vy = 0.0;
         twist_wz = 0.0;
         goal_reached = true;
         manual_drive = true;
-        executing_motion = false;
-        std::cout << ">>> ARRIVATI A (-5, 11)! <<<" << std::endl;
+        motion_active = false;
+        std::cout << ">>> TARGET RAGGIUNTO (11, 0) <<<" << std::endl;
         return;
     }
+
+    // 2. Calcolo PROGRESSO (0.0 = inizio, 1.0 = arrivo)
+    double dist_total = std::sqrt(std::pow(target_x - start_x_s, 2) + std::pow(target_y - start_y_s, 2));
+    double fraction_done = 1.0 - (dist_remaining / dist_total);
+    if(fraction_done < 0) fraction_done = 0;
+    if(fraction_done > 1) fraction_done = 1;
+
+    // 3. GESTIONE ROTAZIONE PROGRESSIVA
+    // L'angolo target cambia man mano che avanzi.
+    // Al 0% del percorso devi essere a StartTheta (es. 0°)
+    // Al 100% del percorso devi essere a StartTheta + 90° (M_PI/2)
+    double rotation_total_needed = M_PI / 2.0; [cite_start]// 90 gradi [cite: 1]
+    double target_theta_now = start_th_s + (rotation_total_needed * fraction_done);
     
-    // --- 1. GESTIONE TRASLAZIONE (Straight Line) ---
-    // Per non fare un arco, calcoliamo il vettore nel mondo e lo ruotiamo
-    // nel frame del robot. Il robot scivolerà dritto indipendentemente da come gira.
+    double theta_error = normalizeAngle(target_theta_now - current_theta);
+    double k_w = 2.0; // Guadagno rotazione
+    double cmd_wz = k_w * theta_error;
+
+    [cite_start]// 4. GESTIONE TRASLAZIONE VETTORIALE (Holonomic) [cite: 1]
+    // Vogliamo andare dritti al target indipendentemente da come siamo girati.
+    // Usiamo il vettore distanza globale e lo proiettiamo nel frame LOCALE.
     
-    double k_v = 0.6; // Velocità lineare
+    double v_cruise = 0.5; // Velocità di crociera m/s
     
-    // Proiezione vettoriale perfetta:
-    // Vx e Vy sono calcolati istante per istante usando l'angolo CORRENTE del robot.
-    // Questo compensa esattamente la rotazione del corpo.
-    double cmd_vx = k_v * (dx_global * std::cos(current_theta) + dy_global * std::sin(current_theta));
-    double cmd_vy = k_v * (-dx_global * std::sin(current_theta) + dy_global * std::cos(current_theta));
+    // Normalizziamo il vettore direzione globale e moltiplichiamo per velocità
+    double v_global_x = v_cruise * (dx_global / dist_remaining);
+    double v_global_y = v_cruise * (dy_global / dist_remaining);
 
-    // Saturazione lineare
-    if (cmd_vx > 0.6) cmd_vx = 0.6;
-    if (cmd_vx < -0.6) cmd_vx = -0.6;
-    if (cmd_vy > 0.6) cmd_vy = 0.6;
-    if (cmd_vy < -0.6) cmd_vy = -0.6;
+    // Formule di rotazione inversa (da Mondo a Robot)
+    // Vx_robot = Vgx * cos(th) + Vgy * sin(th)
+    // Vy_robot = -Vgx * sin(th) + Vgy * cos(th)
+    double cmd_vx = v_global_x * std::cos(current_theta) + v_global_y * std::sin(current_theta);
+    double cmd_vy = -v_global_x * std::sin(current_theta) + v_global_y * std::cos(current_theta);
 
-
-    // --- 2. GESTIONE ROTAZIONE (Su se stesso) ---
-    // Calcoliamo la percentuale di percorso fatto per interpolare la rotazione
-    double total_dist = std::sqrt(std::pow(target_x - start_x_s, 2) + std::pow(target_y - start_y_s, 2));
-    double progress = 1.0 - (rho / total_dist); 
-    if(progress < 0) progress = 0; if(progress > 1) progress = 1;
-
-    // Angolo desiderato ORA: parte da StartTheta e va verso TargetTheta linearmente
-    // "Rotazione su se stesso" = rotazione attorno all'asse Z del robot (wz)
-    double target_rotation_amount = M_PI / 2.0; // 90 gradi
-    double desired_theta_now = start_th_s + (target_rotation_amount * progress);
-    
-    double theta_err = normalizeAngle(desired_theta_now - current_theta);
-    double k_w = 2.0; // Alto guadagno per tenere l'angolo "incollato" all'interpolazione
-    double cmd_wz = k_w * theta_err;
-
-    // Saturazione angolare
-    if (cmd_wz > 0.8) cmd_wz = 0.8;
-    if (cmd_wz < -0.8) cmd_wz = -0.8;
+    // Saturazione comandi
+    if (cmd_vx > 0.6) cmd_vx = 0.6;   if (cmd_vx < -0.6) cmd_vx = -0.6;
+    if (cmd_vy > 0.6) cmd_vy = 0.6;   if (cmd_vy < -0.6) cmd_vy = -0.6;
+    if (cmd_wz > 0.8) cmd_wz = 0.8;   if (cmd_wz < -0.8) cmd_wz = -0.8;
     
     twist_vx = cmd_vx;
     twist_vy = cmd_vy;
@@ -154,11 +144,8 @@ void VelocityController::runAutonomousControl() {
 }
 
 void VelocityController::task() {
-    
     int key = _kbhit();
-    if (key != -1) {
-        readKeyboard(key); 
-    }
+    if (key != -1) readKeyboard(key); 
 
     if (!manual_drive && !goal_reached) {
         runAutonomousControl(); 
@@ -166,7 +153,7 @@ void VelocityController::task() {
 
     geometry_msgs::msg::dds_::Twist_ twist_msg;
     twist_msg.linear().x(twist_vx);
-    twist_msg.linear().y(twist_vy);     
+    twist_msg.linear().y(twist_vy); [cite_start]// Fondamentale per non fare archi [cite: 1]
     twist_msg.angular().z(twist_wz);
     twist_pub.publish(&twist_msg);
 
@@ -174,52 +161,38 @@ void VelocityController::task() {
 }
 
 void VelocityController::readKeyboard(int key) {
-
-    if(key==8){
-        std::cout << " : X +\n"; twist_vx += 0.1;
-    } else if(key==2){
-        std::cout << " : X -\n"; twist_vx -= 0.1;
-    } else if(key==4){
-        std::cout << " : Z +\n"; twist_wz += 0.1;
-    } else if(key==6){
-        std::cout << " : Z -\n"; twist_wz -= 0.1;
-    } else if(key==0){
-        std::cout << " : STOP\n";
-        twist_vx = 0.0; twist_vy = 0.0; twist_wz = 0.0;
-        manual_drive = true;
-    } else if(key==7){
-        std::cout << " : GOTO\n";
-        twist_vx = 0.0; twist_vy = 0.0; twist_wz = 0.0;
-        manual_drive = false;
-    } else if(key==3){
-        std::cout << "\n>>> TRASLAZIONE RETTILINEA + SPIN SU SE STESSO <<<\n";
+    if(key==8){ twist_vx += 0.1; std::cout << "X+\n"; }
+    else if(key==2){ twist_vx -= 0.1; std::cout << "X-\n"; }
+    else if(key==4){ twist_wz += 0.1; std::cout << "Z+\n"; }
+    else if(key==6){ twist_wz -= 0.1; std::cout << "Z-\n"; }
+    else if(key==0){ 
+        twist_vx=0; twist_vy=0; twist_wz=0; 
+        manual_drive=true; std::cout << "STOP\n"; 
+    }
+    else if(key==3){
+        std::cout << "\n>>> AVVIO: Target (11,0) con rotazione graduale +90° <<<\n";
         
-        // Salvataggio start point per interpolazione corretta
+        // Salvataggio Start Point per calcolare la % di avanzamento
         start_x_s = current_x;
         start_y_s = current_y;
         start_th_s = current_theta;
 
-        target_x = -5.0;
-        target_y = 11.0;
-        
-        // Target finale = Start + 90 gradi
-        target_theta = normalizeAngle(start_th_s + (M_PI / 2.0)); 
+        // Impostazione Target richiesto
+        target_x = 11.0;
+        target_y = 0.0;
+        target_theta = normalizeAngle(start_th_s + (M_PI / 2.0)); // +90 gradi
 
         manual_drive = false;
         goal_reached = false;
-        executing_motion = true;
-
-        std::cout << "Start: (" << start_x_s << ", " << start_y_s << ")\n";
-        std::cout << "Target: (" << target_x << ", " << target_y << ")\n";
+        motion_active = true;
     }
 }
 
-void VelocityController::init() { std::cout << "Init. Premi '3' per movimento." << std::endl; }
+void VelocityController::init() { std::cout << "Init. Premi '3' per test (11,0)." << std::endl; }
 void VelocityController::reconfigure() {}
 void VelocityController::skip() {}
 void VelocityController::missed() {}
 void VelocityController::quit() {}
-
 void VelocityController::twistConnectionCallback(VariantActivity* va, std::string port, bool matched, int num_connections) {}
 void VelocityController::roverOdomConnectionCallback(VariantActivity* va, std::string port, bool matched, int num_connections) {}
 
