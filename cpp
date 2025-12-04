@@ -113,22 +113,32 @@ void VelocityController::task() {
             double dy = target_y - y;
             double dist = sqrt(dx*dx + dy*dy);
 
-            if(dist > 0.05)
-                twist_msg.linear().x(0.2);
-            else
-                twist_msg.linear().x(0.0);
+            double vx_world = 0.0;
+            double vy_world = 0.0;
+
+            if(dist > 0.05) {
+                // Movimento dritto nel mondo
+                vx_world = 0.3 * (dx/dist);
+                vy_world = 0.3 * (dy/dist);
+            }
+
+            // CONVERSIONE MONDO → ROBOT (per evitare l’arco)
+            double vx_robot =  cos(yaw)*vx_world + sin(yaw)*vy_world;
+            double vy_robot = -sin(yaw)*vx_world + cos(yaw)*vy_world;
+
+            twist_msg.linear().x(vx_robot);
+            twist_msg.linear().y(vy_robot);
 
             double dyaw = target_theta - yaw;
 
             if(fabs(dyaw) > 0.05)
-                twist_msg.angular().z(0.3);
+                twist_msg.angular().z(0.4);
             else {
                 twist_msg.angular().z(0.0);
                 goto_mode = false;
                 manual_drive = true;
             }
 
-            twist_msg.linear().y(0.0);
             twist_pub.publish(&twist_msg);
             return;
         }
@@ -141,7 +151,6 @@ void VelocityController::task() {
     twist_pub.publish(&twist_msg);
     odometryCallback(this);
 }
-
 void VelocityController::readKeyboard(int key) {
 
     if(key==8){
