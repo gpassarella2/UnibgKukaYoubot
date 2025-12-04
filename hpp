@@ -45,12 +45,17 @@
  * License LGPL and BSD license along with this program.
  *
  ******************************************************************************/
-#ifndef AURORA_INPUT_READER_ACTIVITY_H
-#define AURORA_INPUT_READER_ACTIVITY_H
+#ifndef VELOCITYCONTROLLER_HPP_
+#define VELOCITYCONTROLLER_HPP_
 
-#include <stresa/core/runtime/VActivity.hpp>
-#include "stresa/core/msgs/geometry_msgsPubSubTypes.h"
-#include "aurora/nav_msgsPubSubTypes.h"
+#include <stresa/core/VActivity.hpp>
+#include <stresa/core/Variant.hpp>
+#include <string>
+#include <vector>
+
+// Messaggi DDS (adattare in base alle definizioni esatte nel tuo progetto)
+#include <geometry_msgs/msg/dds_/Twist_.h>
+#include <nav_msgs/msg/dds_/Odometry_.h>
 
 using namespace stresa;
 
@@ -60,36 +65,48 @@ namespace components {
 class VelocityController : public VActivity {
 public:
     VelocityController();
-    ~VelocityController();
+    virtual ~VelocityController();
 
-    static void twistConnectionCallback(VariantActivity* va, std::string port, bool matched, int num_connections);
-    static void roverOdomConnectionCallback(VariantActivity* va, std::string port, bool matched, int num_connections);
+    // Metodi del ciclo di vita del componente
+    void init();
+    void reconfigure();
+    void task();
+    void skip();
+    void missed();
+    void quit();
+    void twistConnectionCallback(VariantActivity* va, std::string port, bool matched, int num_connections);
+    void odometryConnectionCallback(VariantActivity* va, std::string port, bool matched, int num_connections);    
     static void odometryCallback(VariantActivity* va);
 
 protected:
-    void init();
-    void reconfigure();
-    void skip();
-    void missed();
-    void task();
-    void quit();
+    // Publisher per inviare comandi di velocità
+    VariantPublisher twist_pub;
+    // Subscriber per leggere la posizione corrente
+    VariantSubscriber odometrySub;
 
 private:
-    VPublisher<geometry_msgs::msg::dds_::Twist_PubSubType> twist_pub;
-    VSubscriber<nav_msgs::msg::dds_::Odometry_PubSubType> odometrySub;
+    // Funzioni interne
+    int _kbhit();                 // Per controllare se un tasto è premuto
+    void handleUserInput();       // Gestisce l'input da tastiera
+    void computeControl();        // Calcola le velocità
+    double normalizeAngle(double angle); // Normalizza l'angolo tra -PI e +PI
 
-    double twist_vx, twist_vy, twist_wz;
-    bool manual_drive;
+    // Stato del robot
+    double current_x, current_y, current_theta;
+    
+    // Stato del target
+    double target_x, target_y;
+    double start_x, start_y, start_theta; // Per calcolare la proporzione
+    double initial_distance;              // Distanza totale all'inizio del movimento
+    bool is_moving;
 
-    void readKeyboard(int key);
-
-    double target_x, target_y, target_theta;
-
-    bool goto_mode;
-
+    // Parametri del controllore (Guadagni)
+    double Kp_linear;  // Guadagno proporzionale per X e Y
+    double Kp_angular; // Guadagno proporzionale per l'orientamento
+    double tolerance_xy; // Tolleranza di arrivo (metri)
 };
 
 } // namespace components
 } // namespace aurora
 
-#endif
+#endif /* VELOCITYCONTROLLER_HPP_ */
