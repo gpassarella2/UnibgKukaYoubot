@@ -109,7 +109,7 @@ void VelocityController::runAutonomousControl() {
 
     double rho = std::sqrt(dx*dx + dy*dy);
 
-    if (rho < 0.05) {
+    if (rho < 0.1) {
         twist_vx = 0.0;
         twist_vy = 0.0;
         twist_wz = 0.0;
@@ -119,18 +119,16 @@ void VelocityController::runAutonomousControl() {
         return;
     }
     
-    double theta_error = normalizeAngle(target_theta - current_theta);
-
     double k_v = 0.5;   
     double k_w = 1.0; 
 
     double cmd_vx = k_v * (dx * std::cos(current_theta) + dy * std::sin(current_theta));
     double cmd_vy = k_v * (-dx * std::sin(current_theta) + dy * std::cos(current_theta));
-    double cmd_wz = k_w * theta_error;
+    double cmd_wz = k_w * normalizeAngle(target_theta - current_theta);
 
     if (cmd_vx > 0.5) cmd_vx = 0.5; // Max 0.5 m/s
     if (cmd_vx < -0.5) cmd_vx = -0.5;
-    
+
     if (cmd_vy > 0.5) cmd_vy = 0.5;
     if (cmd_vy < -0.5) cmd_vy = -0.5;
 
@@ -182,6 +180,7 @@ void VelocityController::readKeyboard(int key) {
         twist_vx = 0.0;
         twist_vy = 0.0;
         twist_wz = 0.0;
+        manual_drive = true;
     } else if(key==7){
         std::cout << " : GOTO\n";
         twist_vx = 0.0;
@@ -189,27 +188,18 @@ void VelocityController::readKeyboard(int key) {
         twist_wz = 0.0;
         manual_drive = false;
     } else if(key==3){
-                std::cout << "\GOTO TRASL\n";
-                
-                double local_x = 2.0; 
-                double local_y = 2.0; 
-                double local_theta = M_PI / 2.0; 
+        std::cout << "\GOTO TRASL\n";
+        
+        target_x = -5.0;
+        target_y = 11.0;
+        target_theta = 0.0; 
 
-                double cos_th = cos(current_theta);
-                double sin_th = sin(current_theta);
+        manual_drive = false;
+        goal_reached = false;
 
-                target_x = current_x + (local_x * cos_th - local_y * sin_th);
-                target_y = current_y + (local_x * sin_th + local_y * cos_th);
-                
-                target_theta = normalizeAngle(current_theta + local_theta);
-
-                manual_drive = false;
-                goal_reached = false;
-
-                std::cout << "Start Pose: (" << current_x << ", " << current_y << ")\n";
-                std::cout << "Global Target: (" << target_x << ", " << target_y << ")\n";
-                std::cout << "Il robot calcolera' la curva in tempo reale...\n";
-            }
+        std::cout << "Start Pose: (" << current_x << ", " << current_y << ")\n";
+        std::cout << "Global Target: (" << target_x << ", " << target_y << ")\n";
+    }
 }
 
 void VelocityController::init() { std::cout << "Init. Premi '3' per arco automatico." << std::endl; }
