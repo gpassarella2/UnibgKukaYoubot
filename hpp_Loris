@@ -32,21 +32,13 @@ private:
     VSubscriber<nav_msgs::msg::dds_::Odometry_PubSubType> odometrySub;
 
     // Stato
-    double current_x;
-    double current_y;
-    double current_theta;
+    double current_x, current_y, current_theta;
 
     // Target
-    double target_x;
-    double target_y;
-    
-    // Angolo da mantenere fisso durante la traslazione
-    double locked_theta; 
+    double target_x, target_y, target_theta;
 
     // Comandi
-    double twist_vx;
-    double twist_vy; 
-    double twist_wz;
+    double twist_vx, twist_vy, twist_wz;
 
     bool manual_drive;
     bool goal_reached;
@@ -55,8 +47,8 @@ private:
     double normalizeAngle(double angle);
     double quaternionToYaw(double x, double y, double z, double w);
     
-    // Funzione Corretta con Heading Lock
-    void runTranslationOnly();
+    // Funzione di controllo Omnidirezionale
+    void runOmniMoveAndRotate();
 };
 
 } // namespace components
