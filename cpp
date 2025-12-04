@@ -109,13 +109,9 @@ void VelocityController::runAutonomousControl() {
 
     double rho = std::sqrt(dx*dx + dy*dy);
 
-    double desired_heading = std::atan2(dy, dx);
-    double alpha = normalizeAngle(desired_heading - current_theta);
-
-    double beta = normalizeAngle(target_theta - desired_heading);
-
     if (rho < 0.05) {
         twist_vx = 0.0;
+        twist_vy = 0.0;
         twist_wz = 0.0;
         goal_reached = true;
         manual_drive = true;
@@ -123,22 +119,27 @@ void VelocityController::runAutonomousControl() {
         return;
     }
     
-    double k_rho = 0.5;   
-    double k_alpha = 1.2; 
-    double k_beta = -0.3; 
+    double theta_error = normalizeAngle(target_theta - current_theta);
 
-    if (std::abs(alpha) > M_PI / 2.0) {
-        twist_vx = 0.0; 
-        twist_wz = 0.6 * (alpha > 0 ? 1 : -1); 
-    } else {
-        twist_vx = k_rho * rho;
-        twist_wz = k_alpha * alpha + k_beta * beta;
-    }
+    double k_v = 0.5;   
+    double k_w = 1.0; 
 
-    if (twist_vx > 0.5) twist_vx = 0.5; // Max 0.5 m/s
-    if (twist_wz > 1.0) twist_wz = 1.0; // Max 1.0 rad/s
-    if (twist_wz < -1.0) twist_wz = -1.0;
+    double cmd_vx = k_v * (dx * std::cos(current_theta) + dy * std::sin(current_theta));
+    double cmd_vy = k_v * (-dx * std::sin(current_theta) + dy * std::cos(current_theta));
+    double cmd_wz = k_w * theta_error;
+
+    if (cmd_vx > 0.5) cmd_vx = 0.5; // Max 0.5 m/s
+    if (cmd_vx < -0.5) cmd_vx = -0.5;
     
+    if (cmd_vy > 0.5) cmd_vy = 0.5;
+    if (cmd_vy < -0.5) cmd_vy = -0.5;
+
+    if (cmd_wz > 1.0) cmd_wz = 1.0; // Max 1.0 rad/s
+    if (cmd_wz < -1.0) cmd_wz = -1.0;
+    
+    twist_vx = cmd_vx;
+    twist_vy = cmd_vy;
+    twist_wz = cmd_wz;
 }
 
 void VelocityController::task() {
@@ -154,7 +155,7 @@ void VelocityController::task() {
 
     geometry_msgs::msg::dds_::Twist_ twist_msg;
     twist_msg.linear().x(twist_vx);
-    twist_msg.linear().y(0.0);    
+    twist_msg.linear().y(twist_vy);     
     twist_msg.angular().z(twist_wz);
     twist_pub.publish(&twist_msg);
 
@@ -165,29 +166,29 @@ void VelocityController::readKeyboard(int key) {
 
     // Tasti Manuali
     if(key==8){
-		std::cout << " : X +\n";
-		twist_vx += 0.1;
-	} else if(key==2){
-		std::cout << " : X -\n";
-		twist_vx -= 0.1;
-	} else if(key==4){
-		std::cout << " : Z +\n";
-		twist_wz += 0.1;
-	} else if(key==6){
-		std::cout << " : Z -\n";
-		twist_wz -= 0.1;
-	} else if(key==0){
-		std::cout << " : STOP\n";
-		twist_vx = 0.0;
-		twist_vy = 0.0;
-		twist_wz = 0.0;
-	} else if(key==7){
-		std::cout << " : GOTO\n";
-		twist_vx = 0.0;
-		twist_vy = 0.0;
-		twist_wz = 0.0;
-		manual_drive = false;
-	} else if(key==3){
+        std::cout << " : X +\n";
+        twist_vx += 0.1;
+    } else if(key==2){
+        std::cout << " : X -\n";
+        twist_vx -= 0.1;
+    } else if(key==4){
+        std::cout << " : Z +\n";
+        twist_wz += 0.1;
+    } else if(key==6){
+        std::cout << " : Z -\n";
+        twist_wz -= 0.1;
+    } else if(key==0){
+        std::cout << " : STOP\n";
+        twist_vx = 0.0;
+        twist_vy = 0.0;
+        twist_wz = 0.0;
+    } else if(key==7){
+        std::cout << " : GOTO\n";
+        twist_vx = 0.0;
+        twist_vy = 0.0;
+        twist_wz = 0.0;
+        manual_drive = false;
+    } else if(key==3){
                 std::cout << "\GOTO TRASL\n";
                 
                 double local_x = 2.0; 
