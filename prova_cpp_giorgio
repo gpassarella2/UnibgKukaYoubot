@@ -89,7 +89,7 @@ VelocityController::VelocityController() : VActivity() {
     twist_vy = 0.0;
     twist_wz = 0.0;
 
-    manual_drive = false;
+    manual_drive = true;
 }
 
 VelocityController::~VelocityController() {
