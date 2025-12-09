@@ -1,1 +1,198 @@
+#include "VelocityController.hpp"
+#include <iostream>
+#include <sstream>
+#include <cmath> 
+#include <stdio.h>
+#include <sys/select.h>
+#include <termios.h>
+#include <iomanip> // Aggiunto per setprecision
 
+using namespace stresa;
+
+namespace aurora {
+namespace components {
+
+int _kbhit() {
+    static const int STDIN = 0;
+    static bool initialized = false;
+
+    if (! initialized) {
+        termios term;
+        tcgetattr(STDIN, &term);
+        term.c_lflag &= ~ICANON;
+        tcsetattr(STDIN, TCSANOW, &term);
+        setbuf(stdin, NULL);
+        initialized = true;
+    }
+
+    int bytesWaiting;
+    ioctl(STDIN, FIONREAD, &bytesWaiting);
+    if(bytesWaiting == 0)
+        return -1;
+    return getchar()-48;
+}
+
+VelocityController::VelocityController() : VActivity() {
+    registerPublisher(&twist_pub, "TwistPub", "rt/cmd_vel");
+    registerSubscriber(&odometrySub, "OdometrySub", "rt/odom");
+
+    twist_vx = 0.0;
+    twist_vy = 0.0;
+    twist_wz = 0.0;
+    
+    // Inizializzazione variabili
+    odo_x = 0.0;
+    odo_y = 0.0;
+    odo_z = 0.0;
+
+    manual_drive = true;
+    auto_mode = false; // <--- Inizialmente spento
+}
+
+VelocityController::~VelocityController() {
+}
+
+void VelocityController::twistConnectionCallback(VariantActivity* va, std::string port, bool matched, int num_connections) {
+    std::cout << "VelocityController::" << port;
+    if(matched) std::cout << "  CONNECTED #=" << num_connections << std::endl;
+    else std::cout << "  DISCONNECTED #=" << num_connections << std::endl;
+}
+
+void VelocityController::roverOdomConnectionCallback(VariantActivity* va, std::string port, bool matched, int num_connections) {
+    std::cout << "VelocityController::" << port;
+    if(matched) std::cout << "  CONNECTED #=" << num_connections << std::endl;
+    else std::cout << "  DISCONNECTED #=" << num_connections << std::endl;
+}
+
+void VelocityController::odometryCallback(VariantActivity* va) {
+    VelocityController* activity = (VelocityController*) va;
+
+    SampleInfo m_info;
+    nav_msgs::msg::dds_::Odometry_ odo_msg;
+    
+    if(activity->odometrySub.takeNextData(&odo_msg, &m_info)) {
+        // Aggiorniamo le variabili membro con la posizione corrente
+        activity->odo_x = odo_msg.pose().pose().position().x();
+        activity->odo_y = odo_msg.pose().pose().position().y();
+        activity->odo_z = odo_msg.pose().pose().orientation().z();
+        
+        // Debug output (opzionale, puoi commentarlo se sporca troppo la console)
+        /*
+        std::cout << "ODOM: (" << activity->odo_x << ", " << activity->odo_y << ", " << activity->odo_z << ")" << std::endl;
+        */
+    }
+}
+
+void VelocityController::init() {
+    std::cout << "VelocityController::init()" << std::endl;
+    std::cout << "(8) X+  (2) X-  (4) Z+  (6) Z-  (0) STOP (3) GOTO TARGET" << std::endl;
+}
+
+void VelocityController::reconfigure() {
+    std::cout << "VelocityController reconfigure" << std::endl;
+}
+
+void VelocityController::task() {
+    // 1. Leggi input utente
+    int key = _kbhit();
+    readKeyboard(key);
+
+    // 2. LOGICA DI CONTROLLO AUTOMATICO
+    // Deve stare qui nel loop, non dentro la tastiera, per aggiornarsi continuamente
+    if (auto_mode) {
+        
+        // Calcolo vettore distanza nel mondo GLOBALE
+        double dx = target_x - odo_x;
+        double dy = target_y - odo_y;
+        double distEuclidea = sqrt(dx*dx + dy*dy);
+
+        // Controllo se siamo arrivati (tolleranza 5 cm)
+        if(distEuclidea <= 0.05) {
+            std::cout << "TARGET RAGGIUNTO!" << std::endl;
+            twist_vx = 0.0;
+            twist_vy = 0.0;
+            twist_wz = 0.0;
+            auto_mode = false; // Disattiva automatico
+        } 
+        else {
+            // Calcolo angolo GLOBALE verso il target
+            double alpha = atan2(dy, dx);
+            
+            // Calcolo angolo RELATIVO al robot
+            // SOTTRAZIONE: AngoloMondo - AngoloRobot
+            double relative_angle = alpha - odo_z; // <--- CORREZIONE MATEMATICA
+            
+            // Imposto velocità (costante 1.0 m/s o proporzionale)
+            double speed = 1.0; 
+            
+            // Se siamo molto vicini, rallentiamo per non oscillare
+            if (distEuclidea < 0.5) speed = 0.3;
+
+            // Proietto la velocità sugli assi LOCALI del robot
+            twist_vx = speed * cos(relative_angle);
+            twist_vy = speed * sin(relative_angle);
+            twist_wz = 0.0; // Manteniamo orientamento fisso (traslazione pura)
+            
+            // Debug info
+            std::cout << "Target Dist: " << distEuclidea << " | OdoZ: " << odo_z << " | RelAng: " << relative_angle << std::endl;
+        }
+    }
+
+    // 3. Pubblica il messaggio Twist
+    geometry_msgs::msg::dds_::Twist_ twist_msg;
+    twist_msg.linear().x(twist_vx);
+    twist_msg.linear().y(twist_vy); 
+    twist_msg.angular().z(twist_wz);
+    twist_pub.publish(&twist_msg);
+
+    // Chiama callback per aggiornare dati odometria
+    odometryCallback(this);
+}
+
+void VelocityController::skip() {}
+void VelocityController::missed() {}
+void VelocityController::quit() {
+    std::cout << "VelocityController::quit()" << std::endl;
+}
+
+void VelocityController::readKeyboard(int key) {
+    if (key == -1) return; // Nessun tasto premuto
+
+    if(key==8){
+        std::cout << " : X +\n";
+        manual_drive = true; auto_mode = false; // Disattiva auto se tocco manuale
+        twist_vx += 0.1;
+    } else if(key==2){
+        std::cout << " : X -\n";
+        manual_drive = true; auto_mode = false;
+        twist_vx -= 0.1;
+    } else if(key==4){
+        std::cout << " : Z +\n";
+        manual_drive = true; auto_mode = false;
+        twist_wz += 0.1;
+    } else if(key==6){
+        std::cout << " : Z -\n";
+        manual_drive = true; auto_mode = false;
+        twist_wz -= 0.1;
+    } else if(key==0){
+        std::cout << " : STOP\n";
+        manual_drive = true; 
+        auto_mode = false; // <--- Importante: spegne l'automatico
+        twist_vx = 0.0;
+        twist_vy = 0.0;
+        twist_wz = 0.0;
+    } else if(key==3){
+        std::cout << " : AVVIO GOTO TARGET\n";
+        
+        // Imposta coordinate target
+        target_x = 2.69;
+        target_y = 0.52;
+        
+        // Abilita il flag per il loop in task()
+        auto_mode = true; 
+        manual_drive = false;
+    }
+}
+
+} // namespace components
+} // namespace aurora
