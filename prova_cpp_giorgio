@@ -53,7 +53,7 @@
 #include <stdio.h>
 #include <sys/select.h>
 #include <termios.h>
-#include <iomanip> // Per setprecision
+
 
 using namespace stresa;
 
@@ -88,13 +88,8 @@ VelocityController::VelocityController() : VActivity() {
     twist_vx = 0.0;
     twist_vy = 0.0;
     twist_wz = 0.0;
-    
-    // Inizializzo variabili odom
-    odo_x = 0.0;
-    odo_y = 0.0;
-    odo_z = 0.0;
 
-    manual_drive = true;
+    manual_drive = false;
 }
 
 VelocityController::~VelocityController() {
