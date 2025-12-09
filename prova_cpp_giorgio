@@ -127,12 +127,19 @@ void VelocityController::odometryCallback(VariantActivity* va) {
     nav_msgs::msg::dds_::Odometry_ odo_msg;
     
     if(activity->odometrySub.takeNextData(&odo_msg, &m_info)) {
+
+		std::cout << "ODOMETRY"<<std::endl<<"(";
+		std::cout<<std::setprecision(6)<< odo_msg.pose().pose().position().x() << ", ";
+		std::cout<<std::setprecision(6)<< odo_msg.pose().pose().position().y() << ", ";
+		std::cout<<std::setprecision(6)<< odo_msg.pose().pose().orientation().z() << ") - (";
+		std::cout<<std::setprecision(6)<< odo_msg.twist().twist().linear().x() << ", ";
+		std::cout<<std::setprecision(6)<< odo_msg.twist().twist().linear().y() << ", ";
+		std::cout<<std::setprecision(6)<< odo_msg.twist().twist().angular().z() << ")" << std::endl;
         // Aggiorniamo le variabili della classe con la posizione attuale
         activity->odo_x = odo_msg.pose().pose().position().x();
         activity->odo_y = odo_msg.pose().pose().position().y();
         activity->odo_z = odo_msg.pose().pose().orientation().z();
         
-        // Debug (opzionale)
         // std::cout << "Odom: " << activity->odo_x << ", " << activity->odo_y << ", " << activity->odo_z << std::endl;
     }
     
