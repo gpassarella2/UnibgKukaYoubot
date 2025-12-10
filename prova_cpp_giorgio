@@ -148,7 +148,7 @@ void VelocityController::odometryCallback(VariantActivity* va) {
 
 void VelocityController::init() {
     std::cout << "VelocityController::init()" << std::endl;
-    std::cout << "(8) X+  (2) X-  (4) Z+  (6) Z-  (0) STOP (g) GoTo" << std::endl;
+    std::cout << "(8) X+  (2) X-  (4) Z+  (6) Z-  (0) STOP (3) GoTo" << std::endl;
 }
 
 void VelocityController::reconfigure() {
@@ -239,7 +239,7 @@ void VelocityController::readKeyboard(int key) {
         twist_vx = 0.0;
         twist_vy = 0.0;
         twist_wz = 0.0;
-    } else if(key==g){
+    } else if(key==3){
         std::cout << " : GOTO START\n";
         
         // Imposto solo le coordinate, il calcolo vero lo fa il task()
