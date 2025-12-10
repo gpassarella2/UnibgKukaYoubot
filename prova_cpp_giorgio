@@ -1,6 +1,6 @@
 /********************************************************************************
  *
- * VelocityController
+ * InputReaderActivity
  *
  * Copyright (c) 2019
  * All rights reserved.
@@ -8,7 +8,7 @@
  * Davide Brugali, Università degli Studi di Bergamo
  *
  * -------------------------------------------------------------------------------
- * File: VelocityController.cpp
+ * File: InputReaderActivity.cpp
  * Created: May 5, 2019
  * Author: <A HREF="mailto:brugali@unibg.it">Davide Brugali</A>
  * -------------------------------------------------------------------------------
@@ -46,6 +46,7 @@
  *
  ******************************************************************************
  */
+
 #include "VelocityController.hpp"
 #include <iostream>
 #include <sstream>
@@ -65,6 +66,7 @@ int _kbhit() {
     static bool initialized = false;
 
     if (! initialized) {
+		// Use termios to turn off line buffering
         termios term;
         tcgetattr(STDIN, &term);
         term.c_lflag &= ~ICANON;
@@ -84,11 +86,13 @@ VelocityController::VelocityController() : VActivity() {
     // register the variant publisher
     registerPublisher(&twist_pub, "TwistPub", "rt/cmd_vel");
     registerSubscriber(&odometrySub, "OdometrySub", "rt/odom");
+	// registerPublisher(&planRequestPub, "PlanRequestPub", "trajectory2Drequest", planRequestConnectionCallback);
 
     twist_vx = 0.0;
     twist_vy = 0.0;
     twist_wz = 0.0;
 
+	//aspetto da tastiera movimento da fare, se viene selezionato GoTo questo bool = false
     manual_drive = true;
 }
 
@@ -144,7 +148,7 @@ void VelocityController::odometryCallback(VariantActivity* va) {
 
 void VelocityController::init() {
     std::cout << "VelocityController::init()" << std::endl;
-    std::cout << "(8) X+  (2) X-  (4) Z+  (6) Z-  (0) STOP (3) AUTO" << std::endl;
+    std::cout << "(8) X+  (2) X-  (4) Z+  (6) Z-  (0) STOP (g) GoTo" << std::endl;
 }
 
 void VelocityController::reconfigure() {
@@ -176,12 +180,10 @@ void VelocityController::task() {
              twist_vx = 0.0;
              twist_vy = 0.0;
              twist_wz = 0.0;
-             manual_drive = true; // Torniamo in manuale per sicurezza
+		// Torniamo in manuale per sicurezza in maniera che il robot attenda comandi da tastiera
+             manual_drive = true; 
+
         } else {
-             // CORREZIONE MATEMATICA:
-             // Per trasformare dal mondo al robot, si SOTTRAE l'angolo del robot.
-             // Vx = cos(alpha - odo_z)
-             // Vy = sin(alpha - odo_z)
              
              twist_vx = 1.0 * cos(alpha + odo_z);
              twist_vy = 1.0 * sin(alpha + odo_z);
@@ -237,7 +239,7 @@ void VelocityController::readKeyboard(int key) {
         twist_vx = 0.0;
         twist_vy = 0.0;
         twist_wz = 0.0;
-    } else if(key==3){
+    } else if(key==g){
         std::cout << " : GOTO START\n";
         
         // Imposto solo le coordinate, il calcolo vero lo fa il task()
