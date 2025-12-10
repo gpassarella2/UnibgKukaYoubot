@@ -188,8 +188,9 @@ void VelocityController::task() {
             twist_vx = 1.0 * cos(alpha + odo_z);
             twist_vy = 1.0 * sin(alpha + odo_z);
 
-            // progressione rotazione questa funzione si puo usare per fermarlo
+            // progressione rotazione questa funzione calcola una costante da moltiplicare all'angolo di rotazione 
             double progress = 1.0 - (distEuclidea / dist_iniziale);
+			//casi estremi
             if(progress < 0) progress = 0;
             if(progress > 1) progress = 1;
 
