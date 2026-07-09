@@ -1,7 +1,7 @@
-```markdown
+
 <div align="center">
 
-<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/Kuka_YouBot.jpg/1200px-Kuka_YouBot.jpg" alt="Kuka YouBot" width="45%">
+
 
 # 🏥 Kuka YouBot — Omnidirectional Navigation
 
